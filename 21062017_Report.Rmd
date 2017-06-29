@@ -25,6 +25,8 @@ This libraries were used for the project.
 #libraries:
 #if (!require("pacman")) install.packages("pacman")
 pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric)
+library(ggplot2)
+library(RColorBrewer)
 ```
 
 
@@ -50,16 +52,11 @@ For example, the first row in our data represents the user 9241 who has not list
 (?) shall we add all names?? no?? Summary & explanation 
 
 At the first glimpse, the datasets look like tall data. However, most of the features are factors....
-```{r}
-paste("Number of users:", length(unique(Deezer$user_id)))
-paste("Number of genres:", length(unique(Deezer$genre_id)))
-paste("Number of artists:", length(unique(Deezer$artist_id)))
-paste("Number of albums:", length(unique(Deezer$album_id)))
-paste("Number of songs(media_id):", length(unique(Deezer$media_id)))
-```
-
-```{r}
-```
+Number of users: `r length(unique(Deezer$user_id))`
+Number of genres: `r length(unique(Deezer$genre_id))`
+Number of artists: `r length(unique(Deezer$artist_id))`
+Number of albums: `r length(unique(Deezer$album_id))`
+Number of songs(media_id): `r length(unique(Deezer$media_id))`
 
 * appearance from users in train data set: -> Chris
 ```{r, warning=FALSE}
@@ -70,13 +67,17 @@ user_distribution <- Deezer %>%
 
 sum(is.na(user_distribution$user_id))
 
-ggplot(user_distribution, aes(x=user_id,y=n))+geom_density(stat = "identity")+
-labs(subtitle="per week in November",
-      y="Observations",
-      x="user_id",
-      title="Observations form users",
+gg6 <-ggplot(user_distribution, aes(x=n))+
+  geom_histogram(bins=100, color="darkgreen")+
+  scale_x_continuous(breaks=seq(0,2000,50),limits=c(0,2000))+
+labs(subtitle="in the train set",
+      y="number of users",
+      x="number of songs",
+      title="Distribution of Observations per User",
       caption="Source: Deezer train data")+
-theme_grey()
+theme_light()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave("observations_distribution.png",plot=gg6, width = 8, height=5, units="in")
 ```
 
 
@@ -466,7 +467,7 @@ We didn´t stop at this point, since there are some aspects which are worrying. 
 #### 2(e) User Behavior Index
 
 ```{r}
-load("~/30_Wrangled_Data/Deezer_train_0525.rda")
+load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
 DeezerNew_train_0525$is_listened <- as.numeric(DeezerNew_train_0525$is_listened)-1
 library(dplyr)
 library(splitstackshape)
@@ -500,6 +501,32 @@ scaled[is.na(scaled)] <-0 #for users who have never listened to anything
 #save(genre_scaled.molten,file="30_05_genre_scaled_lookup.rda")
 ```
 
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- melt(profs)
+gg1 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
+  geom_bar(stat="identity", position="dodge")+
+  scale_y_continuous(breaks=seq(0,0.65,0.05))+
+  scale_fill_brewer(palette="Set1")+
+  labs(x="genre",y="relative frequency", title="Relative Genre Frequency",subtitle="for three selected users")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("relative_genre.png",plot=gg1, width = 8, height=5, units="in")
+
+```
+
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- melt(scaled)
+gg2 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+  geom_bar(stat="identity", position="dodge")+
+  scale_y_continuous(breaks=seq(0,1,0.05))+
+  
+  scale_fill_brewer(palette="Set1")+
+  labs(x="genre",y="scaled relative frequency",title="Scaled Relative Genre Frequency",subtitle="for three selected users")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("scaled_relative_genre.png",plot=gg2, width = 8, height=5, units="in")
+```
+
 
 As told, a idea can lead to a cascade of ideas, here is our second thought: "What if the DeezerFlow-Algorithm suggested a genre very often, but it wasn´t listened to often, even through still often enough to let it appear as a favorite genre for this user?" To get a sense for this possibility, we created a new table, with the percentage of how often a genre is listened when played for every user.
 
@@ -516,6 +543,18 @@ listened$user_id <- profs$user_id
 
 #genre_listened.molten <- melt(listened, id.vars="user_id",variable.name="alb.genre2_01",value.name="genre_listened")
 #save(genre_listened.molten,file="30_05_genre_listened_lookup.rda")
+```
+
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- melt(listened)
+gg3 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
+  geom_bar(stat="identity", position="dodge")+
+  scale_y_continuous(breaks=seq(0,1,0.05),limits = c(0,1))+
+  scale_fill_brewer(palette="Set1")+
+  labs(x="genre",y="average is_listened",title="Average is_listened per Genre",subtitle="for three selected users")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("average_is_listened.png",plot=gg3, width = 8, height=5, units="in")
 ```
 
 Combining the scaled genre preferences as well as the listening history is exactly what we had in mind. As one of the value descreases, the overall trustworthyness of the data is going down. As long as both values are high oder extremely low, we can be pretty sure that a user has listened or not listened to the song respectively.
@@ -538,6 +577,17 @@ counts$user_id <- profs$user_id
 #save(genre_counts.molten,file="30_05_genre_counts_lookup.rda")
 ```
 
+
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- melt(counts)
+gg4 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+  geom_bar(stat="identity", position="dodge")+scale_y_continuous(breaks=seq(0,90,5),limits = c(0,90))+
+  scale_fill_brewer(palette="Set1")+
+  labs(x="genre",y="Count",title="Count per Genre",subtitle="for three selected users")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("count.png",plot=gg4, width = 8, height=5, units="in")
+```
 test if cols and user_ids are arranged identicalle for each of the three tables.
 
 ```{r}
@@ -607,6 +657,30 @@ behavior <- sqrt(scaled[,-47])*listened[,-47]*log(counts[,-47]+1)
 behavior$user_id <- scaled$user_id
 #behavior_molten <- melt(behavior, id.vars="user_id",variable.name="alb.genre2_01",value.name="behavior")
 #save(behavior_molten,file="25_05_new_behavior_lookup.rda")
+```
+
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- melt(behavior)
+gg5 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+  geom_bar(stat="identity", position="dodge")+scale_y_continuous(breaks=seq(0,4,0.25),limits = c(0,4))+
+  scale_fill_brewer(palette="Set1")+
+  labs(x="genre",y="behavior index",title="Behavior Index",subtitle="for three selected users")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("behavior_index.png",plot=gg5, width = 8, height=5, units="in")
+```
+
+```{r fig.width=8,fig.height=5, message=FALSE}
+tmp <- cbind.data.frame(sqrt(seq(0,1,length.out = 100)),seq(0,1,length.out = 100))
+colnames(tmp) <- c("after","before")
+gg6 <- ggplot(tmp,aes(x=before,y=after))+geom_point()+
+  scale_y_continuous(breaks=seq(0,1,0.1),limits = c(0,1))+
+  scale_x_continuous(breaks=seq(0,1,0.1),limits = c(0,1))+
+  scale_fill_brewer(palette="Set1")+
+  labs(x="x",y="sqrt(x)",title="Sqrt(x) versus x")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("sqrt.png",plot=gg6, width = 8, height=5, units="in")
 ```
 
 As you can imagine, the Behavior-Matrix is sparsely filled, since unlistened genres are set to 0, because g will be 0, even if c is not.
