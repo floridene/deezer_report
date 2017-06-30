@@ -20,7 +20,7 @@ Therefore, the report will give a short introduction to the dataset at first. Se
 The libraries were used for the project are the following: 
 ```{r Initialization, echo=FALSE, warning=FALSE, message=FALSE}
 #if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr)
+pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot)
 #library(ggplot2)
 #library(dplyr)
 #library(RColorBrewer)
@@ -201,16 +201,40 @@ ggplot(number_genre, aes(genre_id)) + geom_histogram() # what am i doing wrong, 
   
 ```{r}
 sum(is.na(Deezer$media_duration))
-#barchart(Deezer$media_duration)
+hist(Deezer$media_duration)
 ```
 
   * context_type - type of content where the song was listened: playlist, album ...
   
   
+```{r}
+hist(Deezer$context_type)
+
+data.table(table(Deezer$context_type))
+```
+
+  
   * release_date - release date of the song with the format YYYYMMDD
 
+
+
 #### 2(c) Device specific features
+
+  * platform_name - type of os
+
+  * platform_family - type of device
+  
+  
+```{r}
+plot(as.factor(Deezer$platform_family))
+plot(as.factor(Deezer$platform_name))
+cor(Deezer$platform_family, Deezer$platform_name)
+```
+
 #### 2(d) Other features, incl. response variable
+
+  * ts_listen - timestamp of the listening in UNIX time
+  * listen_type - if the songs was listened in a flow or not (unimportant, as all songs are the first of the flow)
 -> response variable... verteilung von genres when listenend and nicht listened
 
 #### 2(d) Summary of main challenges
@@ -221,7 +245,15 @@ Therefore, the main challenge of that project was how to model with this amount 
 
 * Genre_id
 * Timestamp to grained 
-*Correlation Matrix
+*Correlation Matrix / correlation plot
+
+```{r}
+corDeezer <- cor(Deezer)
+corrplot(corDeezer, method = "ellipse", type = "full")
+
+?corrplot
+```
+
 
 
 ##2. Feature Engineering
@@ -231,6 +263,7 @@ In this part, we will talk about our Feature Engineering. We will start with eas
 #### 2(a) Timestamp conversion
 
 Converting the Timestamp is the most basic feature engineering we have done. We extract Hour of Day as well as weekday from the timestamp. This procedure is so easy, that we did it on the fly, as you will see at the end of the feature engineering section. Nethertheless, here is what will happen.
+
 
 ```{r}
 transforming_timestamp <- function(x){
