@@ -1,0 +1,9 @@
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/h2o%20dl%20logloss%20on%20validation%20set.PNG)
+
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/validation%20evaluation%20matrix.PNG)
+
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/validation%20matrix.PNG)
+
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/AUC%20for%20validation%20set.PNG)
+
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/Preds_DLH2O_0531.png)
