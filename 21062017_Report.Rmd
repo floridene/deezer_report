@@ -46,6 +46,10 @@ Deezer_test <- read.csv("/home/Deezer/10_Basic_Dataset/test.csv")
 dim(Deezer)
 dim(Deezer_test)
 head(Deezer)
+tmp <- Deezer_test[,-1] #needed for what?? feature engineering?? obviously!
+tmp$is_listened <- 0
+all <- rbind(Deezer,tmp)
+rm(tmp)
 ```
 For example, the first row in our data represents the user 9241 who has not listened longer than 30 seconds to the song 222606 from the artist 55164. As it is shown in the table above, the features are: media_id, album_id, ... 
 
@@ -83,11 +87,21 @@ ggsave("observations_distribution.png",plot=gg6, width = 8, height=5, units="in"
 
 age
 ```{r}
-users<- Deezer %>%
-  group_by(user_id)
+tmp <- Deezer %>%
+  group_by(user_id) %>% summarise(age=max(user_age)) %>%  select(user_id,age)
+myColors <- c(brewer.pal(7,"GnBu"),brewer.pal(6,"GnBu"))
 
-head(users)
+gg7 <- ggplot(tmp, aes(x=age))+stat_bin(binwidth=1, fill=myColors, color="black") +  scale_y_continuous(limits=c(0,2200),breaks=seq(0,2200,100))+
+    stat_bin(binwidth=1, geom="text", aes(label=..count..), vjust=-1.5)+ scale_x_continuous(breaks=seq(18,30,1))+
+labs(y="number of users",
+      x="age",
+      title="Distribution of Age among Users",
+      caption="Source: Deezer train data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave("Age_distribution.png",plot=gg7, width = 8, height=5, units="in")
 ```
+
 
 
 
@@ -122,12 +136,7 @@ correlations <- data.table(cor(Deezer))
 
 
 ???
-```{r}
-tmp <- Deezer_test[,-1] #needed for what?? feature engineering??
-tmp$is_listened <- 0
-all <- rbind(Deezer,tmp)
-rm(tmp)
-```
+
 
 ##2. Feature Engineering
 
@@ -149,6 +158,68 @@ timestamp = as.POSIXct(x$ts_listen, origin="1970-01-01")
 transforming_timestamp(Deezer)[1:10,12:17]
 ```
 
+```{r}
+tmp <- transforming_timestamp(Deezer)
+myColors <- rep(brewer.pal(6,"GnBu"),4)
+
+gg9 <- ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,600000),breaks=seq(0,600000,50000))+
+  scale_x_continuous(breaks=seq(0,23,1))+
+labs(y="observations",
+      x="hour of day",
+      title="Distribution of Listening Hour",
+      caption="Source: Deezer train data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave("hh_distribution_train.png",plot=gg9, width = 8, height=5, units="in")
+```
+
+```{r}
+myColors <- brewer.pal(7,"GnBu")
+
+gg10<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,1300000),breaks=seq(0,1300000,100000))+
+  scale_x_continuous(breaks=seq(0,6,1))+
+labs(y="observations",
+      x="weekday",
+      title="Distribution of Listening Weekday",
+      caption="Source: Deezer train data")+
+theme_light()
+ggsave("wd_distribution_train.png",plot=gg10, width = 8, height=5, units="in")
+```
+
+```{r}
+tmp <- transforming_timestamp(Deezer_test)
+myColors <- rep(brewer.pal(6,"GnBu"),4)
+
+gg11 <- 
+  ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,1800),breaks=seq(0,1800,100))+
+  scale_x_continuous(breaks=seq(0,23,1))+
+labs(y="observations",
+      x="hour of day",
+      title="Distribution of Listening Hour",
+     subtitle="for test data",
+      caption="Source: Deezer test data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave("hh_distribution_test.png",plot=gg11, width = 8, height=5, units="in")
+```
+
+```{r}
+myColors <- brewer.pal(7,"GnBu")
+
+gg12<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,5000),breaks=seq(0,5000,250))+
+  scale_x_continuous(breaks=seq(0,6,1))+
+labs(y="observations",
+      x="weekday",
+      title="Distribution of Listening Weekday",
+     subtitle="for test data",
+      caption="Source: Deezer test data")+
+theme_light()
+ggsave("wd_distribution_test.png",plot=gg12, width = 8, height=5, units="in")
+```
 
 #### 2(b) Beats per Minute
 
@@ -356,12 +427,35 @@ tracks_clean2 <- tracks_clean[,c(2,3)]
 #save(tracks_clean, file="data_for_genre_loop.rda")
 #save(tracks_clean2,file="tracks_cleaned.rda")
 ```
-To fill the missing genre_ids for our 999 observations, we will conduct a glm model to predict the genre by the songs bpm, since we have already exhausted all other possibilities. According to a majority vote on how the genre_id is distributed on the known cases, we could assume, that the missing ones are "pop".
 
 ```{r}
+load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda")
+
+myColors <- rep(brewer.pal(5,"GnBu"),4)
+
+gg8 <- ggplot(tracks_clean2, aes(x=track_bpm))+stat_bin(bins=20, fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,80000),breaks=seq(0,80000,5000))+
+  scale_x_continuous(breaks=seq(50,220,10),limits=c(50,220))+
+labs(title="Distribution of Beats per Minute",
+     y="observations",
+      x="beats per minute",
+      caption="Source: Deezer train data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("BPM_distribution.png",plot=gg8, width = 8, height=5, units="in")
+
+```
+
+
+To fill the missing genre_ids for our 999 observations, we will conduct a glm model to predict the genre by the songs bpm, since we have already exhausted all other possibilities. According to a majority vote on how the genre_id is distributed on the known cases, we could assume, that the missing ones are "pop".
+
+```{r, fig.width=8,fig.height=5}
+#load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
 #insert treemap of genre distribution
-#library(treemap)
-#albums2 %>% group_by(alb.genre2_01) %>% summarise(n=n())
+library(treemap)
+png(filename="genre_treemap.png",width=16, height=9, units = "in",res=72)
+treemap(DeezerNew_train_0525 %>% group_by(alb.genre2_01) %>% summarise(n=log(n())), index="alb.genre2_01",vSize = "n",title = "Logarithmic Distribution of Genres", palette = "GnBu")
+dev.off()
 ```
 
 Note that this code will run for some minutes, you can skip the following two chunks without missing something crucial.
@@ -403,7 +497,7 @@ albums2 <- albums2[!duplicated(albums2$album_id),]
 #### 2(d) User clusters by genre
 
 ```{r}
-load("~/30_Wrangled_Data/Deezer_train_0525.rda") #we load a newer version of the data at this stage, but we only build on what has been worked out so far.
+load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda") #we load a newer version of the data at this stage, but we only build on what has been worked out so far.
 DeezerNew_train_0525$is_listened <- as.numeric(DeezerNew_train_0525$is_listened)-1
 library(dplyr)
 library(splitstackshape)
@@ -696,14 +790,54 @@ behavior[1:10,1:10]
 Finally we can replace the previous clustering by clustering across the users Behavior_index.
 If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
 
+
+
+We want to use this journey back into out beginnings to show how different clustering methods looked like. Finally tho, we used the method "complete" and set the cutoff point to 35 clusters.
+
 ```{r}
 d <- dist(behavior[,-47]) 
+c.tree.comp = hclust(d,method="complete")
+
+w.tree.comp = hclust(d,method="ward.D2")
+
+s.tree.comp = hclust(d,method="single")
+```
+
+```{r fig.width=8}
+png(filename="clustering_types.png",width=16, height=9, units = "in",res=72)
+par(mfrow=c(1,3)) 
+plot(c.tree.comp)
+plot(w.tree.comp)
+plot(s.tree.comp)
+dev.off()
+
+png(filename="clustering_complete.png",width=16, height=9, units = "in",res=72)
+plot(c.tree.comp)
+dev.off()
+```
+
+```{r}
 tree.comp = hclust(d,method="complete")
 labs.comp = cutree(tree.comp,k=35)
 cluster_user_lookup <-as.data.frame(behavior$user_id)
 cluster_user_lookup$profile_id <- labs.comp
 colnames(cluster_user_lookup) <- c("user_id","profile_id")
 # save(cluster_user_lookup, file="23_05_SQRT_35_Clusters.rda")
+```
+
+
+```{r}
+load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
+myColors <- rep(brewer.pal(7,"GnBu"),5)
+
+gg13 <- ggplot(cluster_user_lookup, aes(x=profile_id))+stat_bin(binwidth=1,fill=myColors, color="black")+scale_y_log10()+
+  scale_x_continuous(breaks=seq(1,35,1))+
+labs(y="log10 of observations",
+      x="profile cluster",
+      title="Logarithmic Distribution of Profile Belonging",
+      caption="Source: Feature Engineering Behavior_index Clustering")+
+theme_light()+theme(axis.text.x = element_text(angle = 75, hjust = 1))
+ggsave("distribution_profiles.png",plot=gg13, width = 8, height=5, units="in")
 ```
 
 The profiles were saved in a lookuptable and joined onto the data.
