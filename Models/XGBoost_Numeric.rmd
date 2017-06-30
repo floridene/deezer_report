@@ -1,6 +1,6 @@
-#XGBoost Numeric | Binary Logistic | 2017-05-30 
-# Score: 0.63073 (Public)	0.63217 (Private) 
-# Bin Logit without IDs | AUC 0.81 on validation set
+# XGBoost Numeric | Binary Logistic | 2017-05-30 
+#Score: 0.63073 (Public)	0.63217 (Private) 
+#Bin Logit without IDs | AUC 0.81 on validation set
 
 
 ```{r}
