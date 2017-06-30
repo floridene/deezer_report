@@ -1,0 +1,137 @@
+#h2o Auto ML (31st May data) | max_runtime 3600 secs | 14.22 GB cluster | w/o user ID
+
+```{r}
+setwd("~/R/DSG 17/525NewFeats/H2O_Auto_ML")
+
+#Launch an H2O cluster on localhost
+library(h2o)
+h2o.init(nthreads=-1, max_mem_size = "16g", enable_assertions = FALSE)
+
+#Import the data into H2O
+train_test<-h2o.uploadFile("train_test_0531.csv",destination_frame = "train.hex")
+
+train_test$user_id = NULL
+train_test$is_listened = as.factor(train_test$is_listened)
+str(train_test)
+
+
+#Split back to train and test
+train = train_test[1:7558834, ]
+test = train_test[7558835:7578752, ]
+
+# Identify predictors and response
+y <- "is_listened"
+x <- setdiff(names(train), y)
+
+#start time 1650
+aml <- h2o.automl(x, y, training_frame = train, leaderboard_frame = test, max_runtime_secs = 3600, stopping_metric = "AUC")
+
+#end time 1820 (90 mins)
+
+# View the AutoML Leaderboard
+lb <- aml@leaderboard
+lb
+
+# The leader model (model details are in next chunk)
+aml@leader
+
+pred <- h2o.predict(aml@leader, test)
+pred = as.data.frame(pred)
+
+submission= read.csv("sample_submission_kaggle.csv")
+submission$is_listened = pred$p1
+write.csv(submission,"h2o_autoML_0531data_AUC_mrnt3600.csv",row.names = FALSE)
+
+hist(submission$is_listened)
+
+#score: 0.64223	0.63646
+
+# h2o.shutdown()
+```
+
+
+#######################################################################
+# h2O autoML details of best model (autoML stacked_Ensemble 3600)
+#######################################################################
+
+```{r}
+# > aml <- h2o.automl(x, y, training_frame = train, leaderboard_frame = test, max_runtime_secs = 3600, stopping_metric = "AUC")
+#   |==================================================================================================================| 100%
+#   |==================================================================================================================| 100%
+# > lb <- aml@leaderboard
+# > lb
+#                                   model_id auc  logloss
+# 1 StackedEnsemble_0_AutoML_20170625_164746   0 1.021700
+# 2             DRF_0_AutoML_20170625_164746   0 0.979735
+# 
+# [2 rows x 3 columns] 
+# > aml@leader
+# Model Details:
+# ==============
+# 
+# H2OBinomialModel: stackedensemble
+# Model ID:  StackedEnsemble_0_AutoML_20170625_164746 
+# NULL
+# 
+# 
+# H2OBinomialMetrics: stackedensemble
+# ** Reported on training data. **
+# 
+# MSE:  0.12678
+# RMSE:  0.3560618
+# LogLoss:  0.3979894
+# Mean Per-Class Error:  0.2579331
+# AUC:  0.8875087
+# Gini:  0.7750174
+# 
+# Confusion Matrix (vertical: actual; across: predicted) for F1-optimal threshold:
+#              0       1    Error             Rate
+# 0       921093  750328 0.448916  =750328/1671421
+# 1       242339 3377366 0.066950  =242339/3619705
+# Totals 1163432 4127694 0.187610  =992667/5291126
+# 
+# Maximum Metrics: Maximum metrics at their respective thresholds
+#                         metric threshold    value idx
+# 1                       max f1  0.462449 0.871871 244
+# 2                       max f2  0.212482 0.930103 334
+# 3                 max f0point5  0.745298 0.873723 127
+# 4                 max accuracy  0.547416 0.815343 211
+# 5                max precision  0.947793 1.000000   0
+# 6                   max recall  0.054361 1.000000 394
+# 7              max specificity  0.947793 1.000000   0
+# 8             max absolute_mcc  0.657598 0.566240 167
+# 9   max min_per_class_accuracy  0.712906 0.794601 142
+# 10 max mean_per_class_accuracy  0.742152 0.796377 129
+# 
+# Gains/Lift Table: Extract with `h2o.gainsLift(<model>, <data>)` or `h2o.gainsLift(<model>, valid=<T/F>, xval=<T/F>)`
+# H2OBinomialMetrics: stackedensemble
+# ** Reported on validation data. **
+# 
+# MSE:  0.1474018
+# RMSE:  0.3839294
+# LogLoss:  0.452875
+# Mean Per-Class Error:  0.30279
+# AUC:  0.8404396
+# Gini:  0.6808793
+# 
+# Confusion Matrix (vertical: actual; across: predicted) for F1-optimal threshold:
+#             0       1    Error             Rate
+# 0      334343  382578 0.533640   =382578/716921
+# 1      111563 1439224 0.071940  =111563/1550787
+# Totals 445906 1821802 0.217903  =494141/2267708
+# 
+# Maximum Metrics: Maximum metrics at their respective thresholds
+#                         metric threshold    value idx
+# 1                       max f1  0.422079 0.853483 261
+# 2                       max f2  0.144140 0.922040 361
+# 3                 max f0point5  0.727213 0.844857 139
+# 4                 max accuracy  0.517879 0.785478 226
+# 5                max precision  0.947812 0.998335   0
+# 6                   max recall  0.041620 1.000000 399
+# 7              max specificity  0.947812 0.999915   0
+# 8             max absolute_mcc  0.648176 0.491340 175
+# 9   max min_per_class_accuracy  0.725359 0.756033 140
+# 10 max mean_per_class_accuracy  0.734752 0.756417 135
+# 
+# Gains/Lift Table: Extract with `h2o.gainsLift(<model>, <data>)` or `h2o.gainsLift(<model>, valid=<T/F>, xval=<T/F>)`
+```
