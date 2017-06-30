@@ -74,11 +74,11 @@ user_distribution <- Deezer %>%
   group_by(user_id) %>%
   summarise(n=n()) %>%
   arrange (-n)
-
+myColors <- rep(brewer.pal(7,"Blues")[5:6],50)
 sum(is.na(user_distribution$user_id))
 
 gg6 <-ggplot(user_distribution, aes(x=n))+
-  geom_histogram(bins=100, color="darkgreen")+
+  geom_histogram(bins=100, fill=myColors,color="black")+
   scale_x_continuous(breaks=seq(0,2000,50),limits=c(0,2000))+
 labs(subtitle="in the train set",
       y="number of users",
@@ -95,7 +95,7 @@ age
 ```{r}
 tmp <- Deezer %>%
   group_by(user_id) %>% summarise(age=max(user_age)) %>%  select(user_id,age)
-myColors <- c(brewer.pal(7,"GnBu"),brewer.pal(6,"GnBu"))
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],6),"#4292C6")
 
 gg7 <- ggplot(tmp, aes(x=age))+stat_bin(binwidth=1, fill=myColors, color="black") +  scale_y_continuous(limits=c(0,2200),breaks=seq(0,2200,100))+
     stat_bin(binwidth=1, geom="text", aes(label=..count..), vjust=-1.5)+ scale_x_continuous(breaks=seq(18,30,1))+
@@ -166,7 +166,7 @@ transforming_timestamp(Deezer)[1:10,12:17]
 
 ```{r}
 tmp <- transforming_timestamp(Deezer)
-myColors <- rep(brewer.pal(6,"GnBu"),4)
+myColors <- rep(brewer.pal(7,"Blues")[5:6],12)
 
 gg9 <- ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,600000),breaks=seq(0,600000,50000))+
@@ -181,7 +181,7 @@ ggsave("hh_distribution_train.png",plot=gg9, width = 8, height=5, units="in")
 ```
 
 ```{r}
-myColors <- brewer.pal(7,"GnBu")
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],3),"#4292C6")
 
 gg10<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,1300000),breaks=seq(0,1300000,100000))+
@@ -196,7 +196,7 @@ ggsave("wd_distribution_train.png",plot=gg10, width = 8, height=5, units="in")
 
 ```{r}
 tmp <- transforming_timestamp(Deezer_test)
-myColors <- rep(brewer.pal(6,"GnBu"),4)
+myColors <- rep(brewer.pal(7,"Blues")[5:6],12)
 
 gg11 <- 
   ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
@@ -213,7 +213,7 @@ ggsave("hh_distribution_test.png",plot=gg11, width = 8, height=5, units="in")
 ```
 
 ```{r}
-myColors <- brewer.pal(7,"GnBu")
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],3),"#4292C6")
 
 gg12<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,5000),breaks=seq(0,5000,250))+
@@ -437,7 +437,7 @@ tracks_clean2 <- tracks_clean[,c(2,3)]
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda")
 
-myColors <- rep(brewer.pal(5,"GnBu"),4)
+myColors <- rep(brewer.pal(7,"Blues")[5:6],10)
 
 gg8 <- ggplot(tracks_clean2, aes(x=track_bpm))+stat_bin(bins=20, fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,80000),breaks=seq(0,80000,5000))+
@@ -834,7 +834,7 @@ colnames(cluster_user_lookup) <- c("user_id","profile_id")
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
-myColors <- rep(brewer.pal(7,"GnBu"),5)
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],17),"#4292C6")
 
 gg13 <- ggplot(cluster_user_lookup, aes(x=profile_id))+stat_bin(binwidth=1,fill=myColors, color="black")+scale_y_log10()+
   scale_x_continuous(breaks=seq(1,35,1))+
