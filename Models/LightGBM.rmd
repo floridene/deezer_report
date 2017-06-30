@@ -1,9 +1,9 @@
-# LightGBM
+#LightGBM Model
 #2017-05-27	LGB_Preds_NewData_34Feats.csv	
 #Score: 0.62247 (Public)	0.62281 (Private)
 
 ```{r}
-#load this file to quickly build new model (All variables are numeric)
+#load data (All variables are numeric)
 load("train_test_NUM_20170526_P.rda")
 
 #Split back to train and test
@@ -14,9 +14,11 @@ test = train_test[7558835:7578752, ]
 test$is_listened = as.factor(test$is_listened)
 str(test)
 
+##Install Microsoft LightGBM package
 # remove.packages("R6")
-# devtools::install_github("Microsoft/LightGBM", subdir = "R-package", force = TRUE)
+devtools::install_github("Microsoft/LightGBM", subdir = "R-package", force = TRUE)
 library(lightgbm)
+
 library(microbenchmark)
 library(pROC)
 
