@@ -64,10 +64,10 @@ Device specific:
   
 Other features:
   * ts_listen - timestamp of the listening in UNIX time
-  * listen_type - if the songs was listened in a flow or not (unimportant, as all songs are the first of the flow)
+  * listen_type - if the songs was listened in a flow or not
   
 Response variable:
-  * is_listened - 1 if the track was listened, 0 otherwise (30 seconds is listend)
+  * is_listened - 1 if the track was listened longer than 30 seconds, 0 otherwise
 
 ####2(a) User specific features
 
@@ -95,15 +95,16 @@ theme_light()+
 #ggsave("observations_distribution.png",plot=gg6, width = 8, height=5, units="in")
 ```
   
-The data reflects the listening behavior of male and female users. However, in this project we do not know how the values of 0 and 1 belong the a specific gender. The plot below illustrates the amount of user per gender. 
+The data reflects the listening behavior of male and female users. However, in this project we do not know how the values of 0 and 1 belong the specific genders. The plot below illustrates the amount of users per gender. 
 
 ```{r}
 plot(as.factor(Deezer$user_gender))
 ```
 
-The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)`. 50% of all users are `r round(median(Deezer$user_age))` years old. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of all users are 24 years old. The feature age does not contain any NAs in the Deezer dataset.
+The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)`. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of the users are 24 years old or younger. The feature age does not contain any NAs in the Deezer dataset.
 
 ```{r}
+round(median(Deezer$user_age))
 age <- Deezer %>%
   group_by(user_id) %>% summarise(age=max(user_age))
 boxplot(age$age)
@@ -149,7 +150,7 @@ sum(is.na(Deezer$artist_id))
 ```
 
 According to the extra information from the json file, we know that media_id and album_id are strongly correlated with each other. The correlation coefficient in that case is: `r cor(Deezer$media_id,Deezer$album_id)`.
-The following histogram underlines this correlation. Furthermore, some media_ids (and therefore some albums and artists) are recommended quite often over all users. 
+The following histogram underlines this correlation. Furthermore, some media_ids (and therefore some albums and artists) are recommended quite often over all users. (??maybe not necessarily important to show these plots...)
 
 ```{r}
 par(mfrow=c(1,3))
@@ -159,28 +160,7 @@ hist(Deezer$artist_id)
 ```
 
 Likewise, `r length(unique(Deezer$genre_id))` different genres exist in the dataset. The histogram shows clearly that one specific genre with id = 0 occurs 3 million times while the second one for example just occurs not even 1 million times. 
-This would mean that one specific genre is recommended the most. However, further investigations are done in the feature engineering chapter. 
-
-```{r}
-genre_listened <- Deezer %>%
-  filter(is_listened==1) %>%
-  group_by(genre_id) %>%
-  summarize(n=n()) %>%
-  arrange(-n)
-head(genre_listened)
-
-genre_nonlistened <- Deezer %>%
-  filter(is_listened==0) %>%
-  group_by(genre_id) %>%
-  summarize(n=n()) %>%
-  arrange(-n)
-head(genre_nonlistened)
-
-par(mfrow=c(1,2))
-ggplot(genre_listened, aes(genre_id)) + geom_histogram() 
-ggplot(genre_nonlistened, aes(genre_id)) + geom_histogram() 
-```
-
+This would mean that one specific genre is recommended most of the time. However, further investigations are done in the feature engineering chapter. 
 
 ```{r}
 sum(is.na(Deezer$genre_id))
@@ -191,12 +171,12 @@ number_genre <- Deezer %>%
   arrange(-n)
 head(number_genre)
 
-ggplot(number_genre, aes(genre_id)) + geom_histogram() # what am i doing wrong, max?? :(
+ggplot(number_genre, aes(genre_id)) + geom_histogram() # ggplot is fucked for my account-.. i dont know what happened
 ```
 
   
 
-  * media_duration - duration of the song
+(?) media_duration - duration of the song
   
   
 ```{r}
@@ -204,61 +184,77 @@ sum(is.na(Deezer$media_duration))
 hist(Deezer$media_duration)
 ```
 
-  * context_type - type of content where the song was listened: playlist, album ...
+
+(?) context_type - type of content where the song was listened: playlist, album ...
   
   
 ```{r}
+sum(is.na(Deezer$context_type))
 hist(Deezer$context_type)
-
 data.table(table(Deezer$context_type))
 ```
 
   
-  * release_date - release date of the song with the format YYYYMMDD
-
+(?) release_date - release date of the song with the format YYYYMMDD
+```{r}
+sum(is.na(Deezer$release_date))
+```
 
 
 #### 2(c) Device specific features
 
-  * platform_name - type of os
+The dataset contains also information about the device and the operating system the user used for listening. Both features have 3 values (1:3). As it seems that device 1 and the operating system 1 is used the most, we cannot say which specific device or system it is. Furthermore, these both columns are correlated (r=`r round(cor(Deezer$platform_family, Deezer$platform_name),2)`) 
 
-  * platform_family - type of device
-  
-  
 ```{r}
+par(mfrow=c(1,2))
 plot(as.factor(Deezer$platform_family))
 plot(as.factor(Deezer$platform_name))
-cor(Deezer$platform_family, Deezer$platform_name)
+
+sum(is.na(Deezer$platform_family))
+sum(is.na(Deezer$platform_name))
 ```
 
 #### 2(d) Other features, incl. response variable
 
-  * ts_listen - timestamp of the listening in UNIX time
-  * listen_type - if the songs was listened in a flow or not (unimportant, as all songs are the first of the flow)
--> response variable... verteilung von genres when listenend and nicht listened
+The ts_listen feature includes the time information when a specific song was recommended to a user. It is a UNIX format and will be modified later on. Non NAs are detected. 
 
-#### 2(d) Summary of main challenges
+```{r}
+sum(is.na(Deezer$ts_listen))
+```
+
+As the training data covers the overall listening behavior of an user, the song history includes songs which were listened in the flow and songs which were not recommended (listened by search or saved song lists). Thereby, `r round(table(Deezer$listen_type)[1]/1000000,2)` million rows do not presents recommended songs, while `r round(table(Deezer$listen_type)[2]/1000000,2)` were predicted by the recommendation engine Flow. The test data contains just predicted songs by Flow. 
+
+```{r}
+plot(as.factor(Deezer$listen_type))
+table(Deezer_test$listen_type) # 1 wrong entry?? hä
+sum(is.na(Deezer$listen_type))
+```
+
+At last, the most important column "is_listened" presents the response variable in the modeling part. 
+```{r}
+plot(as.factor(Deezer$is_listened))
+sum(is.na(Deezer$is_listened))
+```
+
+#### 2(e) Summary of main challenges
 
 At the first glimpse, the dataset looks like tall data. However, most of the features are factors. As already mentioned in the previous chapter, the data contains `r length(unique(Deezer$user_id))` different users, `r length(unique(Deezer$genre_id))` genres, `r length(unique(Deezer$artist_id))` artists, `r length(unique(Deezer$album_id))` albums and `r length(unique(Deezer$media_id))` unique songs. 
 
-Therefore, the main challenge of that project was how to model with this amount of factors. Furthermore,... (?)
+Therefore, the main challenge of that project was how to create a prediction model with this amount of factors. Furthermore, insufficient data of the column genre_id and a to grained timestamp and release date were the features which needed some improvements. 
 
-* Genre_id
-* Timestamp to grained 
-*Correlation Matrix / correlation plot
-
+Furthermore, the following correlation plot visualizes the collinearity between the variables. 
 ```{r}
 corDeezer <- cor(Deezer)
-corrplot(corDeezer, method = "ellipse", type = "full")
+#png("correlationMatrix.png")
+corDeezerplot <- corrplot(corDeezer, method = "ellipse", type = "full")
+#dev.off()
 ```
 
+##3. Feature Engineering
 
+In this part, we will talk about our Feature Engineering. We will start with easier transformatings and calculations going into advanced thinking processes throughout this chapter. We tried to demonstrate all we have archived and how we got chronologically to the point of most success.
 
-##2. Feature Engineering
-
-In this part, we will talk about our Feature Engineering. We will start with easier transformatings and calculations going into advanced thinkingprocesses throughout this chapter. We tried to demonstrate all we have archived and how we got chronologically to the point of most success.
-
-#### 2(a) Timestamp conversion
+#### 3(a) Timestamp conversion
 
 Converting the Timestamp is the most basic feature engineering we have done. We extract Hour of Day as well as weekday from the timestamp. This procedure is so easy, that we did it on the fly, as you will see at the end of the feature engineering section. Nethertheless, here is what will happen.
 
@@ -673,7 +669,6 @@ labs.comp = cutree(c.tree.comp,k=35)
 This new feature added to our previously best model increased our score by 4%.
 
 We didn´t stop at this point, since there are some aspects which are worrying. e.g. that we dont take into account the number of observations or how often a genre was played, in contrast, we only look at how often a user has listened to a genre. We kept on developing the idea, which is worth a chapter on its own.
-
 
 #### 2(e) User Behavior Index
 
