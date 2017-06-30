@@ -1,0 +1,315 @@
+# XGBoost Numeric | Binary Logistic | 2017-05-30
+# Score: 0.63073 (Public)	0.63217 (Private)
+# Bin Logit without IDs | AUC 0.81 | preds between 0.2 and 0.8
+
+
+```{r}
+library(data.table)
+library(jsonlite)
+library(caret)
+library(xgboost)
+library(mice)
+library(dplyr)
+library(pROC)
+library(caTools)
+library(tm)
+library(qdap)
+library(lubridate)
+library(httr)
+library(Matrix)
+
+#####################################################################################
+Feature Engineering
+#####################################################################################
+
+#load data (prepared as on 25th May)
+load("~/R/DSG 17/525NewFeats/Deezer_train_0525.rda")
+load("~/R/DSG 17/525NewFeats/Deezer_test_0525.rda")
+
+# naming for model
+train = DeezerNew_train_0525
+test = DeezerNew_test_0525
+submission= read.csv("sample_submission_kaggle.csv")
+
+#label (variable to predict)
+y_train = train$is_listened
+
+train_test = rbind(train, test)
+
+#Remove unnecessary columns 
+train_test$sample_id = NULL
+
+#convert factors to numeric (mandatory for XGBoost model)
+train_test %>% mutate_if(is.factor, as.character) -> train_test
+train_test %>% mutate_if(is.integer, as.numeric) -> train_test
+
+train_test$user_id = as.numeric(train_test$user_id)
+train_test$media_id = as.numeric(train_test$media_id)
+train_test$album_id = as.numeric(train_test$album_id)
+train_test$context_type = as.numeric(train_test$context_type)
+train_test$platform_name = as.numeric(train_test$platform_name)
+train_test$platform_family = as.numeric(train_test$platform_family)
+train_test$listen_type = as.numeric(train_test$listen_type)
+train_test$user_gender = as.numeric(train_test$user_gender)
+train_test$artist_id = as.numeric(train_test$artist_id)
+train_test$is_listened = as.numeric(train_test$is_listened)
+train_test$profile_id = as.numeric(train_test$profile_id)
+train_test$hh = as.numeric(train_test$hh)
+train_test$wd = as.numeric(train_test$wd)
+
+##################################################
+#Pre-processing | Add new features 
+##################################################
+
+#Bin hours to Timings of the day
+train_test$binTime =  ifelse(train_test$hh >= 0 & train_test$hh <= 3,  "Midnight",
+                      ifelse(train_test$hh >= 4 & train_test$hh <= 5,  "EarlyMorning",
+                      ifelse(train_test$hh >= 6 & train_test$hh <= 8, "MidMorning", 
+                      ifelse(train_test$hh >= 9 & train_test$hh <= 11, "Morning",
+                      ifelse(train_test$hh >= 12 & train_test$hh <= 16, "Noon",
+                      ifelse(train_test$hh >= 17 & train_test$hh < 21, "Evening", "Night"))))))
+
+#Bin weekends and weekday
+train_test$binwkd =  ifelse(train_test$wd >= 1 & train_test$wd < 5,  "Weekday", "Weekend")
+
+
+#Bin release years
+train_test$binRYear= ifelse(train_test$ryear  > 2017, "Outliers",
+                    ifelse(train_test$ryear == 2017, "Recents",
+                    ifelse(train_test$ryear >= 2015 & train_test$ryear <= 2016, "Latest", 
+                    ifelse(train_test$ryear >= 2010 & train_test$ryear <= 2014, "FairlyLatest",
+                    ifelse(train_test$ryear >= 2000 & train_test$ryear <= 2009, "Mids1",
+                    ifelse(train_test$ryear >= 1990 & train_test$ryear <= 1999, "Mids2",
+                    ifelse(train_test$ryear >= 1980 & train_test$ryear <= 1989, "Oldies1",
+                    ifelse(train_test$ryear >= 1970 & train_test$ryear <= 1979, "Oldies2",
+                    ifelse(train_test$ryear >= 1950 & train_test$ryear <= 1969, "Oldies3", "VeryOld" )))))))))
+
+
+# Add new features: join json file with media description (categorical variables)
+extra = stream_in(file("~/R/DSG 17/data/extra_infos.json"))
+
+str(extra)
+
+##################################################
+## add language feats (detect lang)
+##################################################
+
+library("textcat")
+library("rvest")
+library("stringr")
+
+#text cleaning (in order to assign unique numeric value)
+extra[] = lapply(extra, tolower)
+extra[] = lapply(extra, removePunctuation)
+extra[] = lapply(extra, stripWhitespace)
+
+extra$songLang = textcat(extra$sng_title)
+extra$albLang = textcat(extra$alb_title)
+extra$artistLang = textcat(extra$art_name)
+
+#if song lang and alb lang is exact same them grouping them, else considering it as variation
+extra$langSngAlb = ifelse(extra$songLang  == extra$albLang, extra$albLang, "variation")
+extra$langAlbArt = ifelse(extra$albLang == extra$artistLang, extra$artistLang, "variation")
+extra$langSngArt = ifelse(extra$songLang  == extra$artistLang, extra$artistLang, "variation")
+
+extra$langReg = ifelse(extra$songLang  == "french" | extra$songLang  == "german" | extra$songLang  == "spanish" |
+                       extra$songLang  == "swedish" |  extra$songLang  == "italian" | 
+                       extra$songLang  == "polish", "TopEuLang", "EnglishOrOther")
+str(extra)
+extra$media_id = as.numeric(extra$media_id)
+
+# save(extra,file="extra_feats11.rda")
+
+#add to train_test dataset
+train_test = left_join(train_test, extra, by = "media_id")
+str(train_test)
+
+
+#Bin by user's age
+train_test$binAge = ifelse(train_test$user_age >= 18 & train_test$user_age <= 21 , "yngAds1",
+                    ifelse(train_test$user_age >= 22 & train_test$user_age <= 24 , "yngAds2",
+                    ifelse(train_test$user_age >= 25 & train_test$user_age <= 27 , "yngAds3", "mature")))
+tail(train_test$binAge)
+str(train_test)
+
+##############################################################
+#imputation for NAs
+##############################################################
+
+#Imputing lang NAs with french (which is most common)
+
+# hist(train_test$songLang)
+as.data.frame(train_test %>% group_by(songLang) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$songLang[is.na(train_test$songLang)] = "french"
+
+as.data.frame(train_test %>% group_by(albLang) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$albLang[is.na(train_test$albLang)] = "french"
+
+as.data.frame(train_test %>% group_by(artistLang) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$artistLang[is.na(train_test$artistLang)] = "english"
+
+as.data.frame(train_test %>% group_by(langAlbArt) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$langAlbArt[is.na(train_test$langAlbArt)] = "english"
+
+as.data.frame(train_test %>% group_by(langSngArt) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$langSngArt[is.na(train_test$langSngArt)] = "english"
+
+as.data.frame(train_test %>% group_by(langSngAlb) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$langSngAlb[is.na(train_test$langSngAlb)] = "english"
+
+as.data.frame(train_test %>% group_by(langReg) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$langReg[is.na(train_test$langReg)] = "TopEuLang"
+
+
+as.data.frame(train_test %>% group_by(sng_title) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$sng_title[is.na(train_test$sng_title)] = "tchikita"
+
+as.data.frame(train_test %>% group_by(alb_title) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$alb_title[is.na(train_test$alb_title)] = "dans la légende"
+
+# x = as.data.frame(train_test %>% group_by(art_name) %>% summarise(total = n()) %>% arrange(desc(total)))
+train_test$art_name[is.na(train_test$art_name)] = "pnl"
+
+sum(is.na(train_test))
+summary(train_test)
+
+##############################################################
+#Custom relative feats | media duration  | track_bpm
+##############################################################
+
+summary(train_test$media_duration)
+
+Freq_md = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% arrange(desc(total)))
+Freq_md1 = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% arrange(desc(media_duration)))
+hist(Freq_md$media_duration)
+
+#Bin by media_duration and user_gender
+train_test$md_mf_group =  ifelse(train_test$media_duration <= 100 & train_test$user_gender == 0, 1,
+                          ifelse(train_test$media_duration <= 100 & train_test$user_gender == 1, 2,
+                          ifelse(train_test$media_duration >= 101 & train_test$media_duration <= 200 & 
+                                   train_test$user_gender == 0, 3,
+                          ifelse(train_test$media_duration >= 101 & train_test$media_duration <= 200 & 
+                                   train_test$user_gender == 1, 4,
+                          ifelse(train_test$media_duration >= 201 & train_test$media_duration <= 300 & 
+                                   train_test$user_gender == 0, 5,
+                          ifelse(train_test$media_duration >= 201 & train_test$media_duration <= 300 & 
+                                   train_test$user_gender == 1, 6,
+                          ifelse(train_test$media_duration >= 301 & train_test$media_duration <= 400 & 
+                                   train_test$user_gender == 0, 7,
+                          ifelse(train_test$media_duration >= 301 & train_test$media_duration <= 400 & 
+                                   train_test$user_gender == 1, 8,
+                          ifelse(train_test$media_duration >= 401 & train_test$media_duration <= 500 & 
+                                   train_test$user_gender == 0, 9,
+                          ifelse(train_test$media_duration >= 401 & train_test$media_duration <= 500 & 
+                                   train_test$user_gender == 1, 10, 11))))))))))
+
+hist(train_test$md_mf_group)
+str(train_test)
+
+
+##############################################
+# Save dataset with engieered features
+##############################################
+
+# Covert to all numeric data (This is primary requirement of XGboost model)
+
+train_test %>% mutate_if(is.factor, as.character) -> train_test
+
+# label encoding
+features= names(train_test)
+for (f in features) {
+  if (class(train_test[[f]])=="character") {
+    levels <- unique(c(train_test[[f]]))
+    train_test[[f]] <- as.integer(factor(train_test[[f]], levels=levels))
+  }
+}
+
+#convert into numeric 
+train_test[] <- lapply(train_test, as.numeric)
+str(train_test)
+summary(train_test)
+
+#complied rda file with 34 features (ALL NUMERIC)
+save(train_test,file="train_test_NUM_20170526_P.rda")
+
+##############################################
+# Prepare XGBoost numeric model
+##############################################
+
+#load data (all numeric)
+load("~/R/DSG 17/525NewFeats/train_test_NUM_20170526_P.rda")
+
+#response variable
+str(train_test$is_listened)
+train_test = train_test %>% select(-c(user_id, media_id, album_id, artist_id))
+
+#create 3 sets 
+train = train_test[1:7538916, ]
+valid = train_test[7538917:7558834, ]
+test = train_test[7558835:7578752, ]
+
+#Convert to matrix
+xgb.data.train <- xgb.DMatrix(as.matrix(train[, colnames(train) != "is_listened"]), label = train$is_listened)
+xgb.data.valid <- xgb.DMatrix(as.matrix(valid[, colnames(valid) != "is_listened"]), label = valid$is_listened)
+xgb.data.test <- xgb.DMatrix(as.matrix(test[, colnames(test) != "is_listened"]), label = test$is_listened)
+
+
+# Train xgb model
+xgb.model.binLogit <- xgb.train(data = xgb.data.train,
+                           params = list(objective = "binary:logistic", 
+                                          eta = 0.1, 
+                                          max.depth = 12, 
+                                          min_child_weight = 100, 
+                                          subsample = 0.8, 
+                                          colsample_bytree = 0.8, 
+                                          nthread = 4, 
+                                          eval_metric = "auc"), 
+                            watchlist = list(valid = xgb.data.valid), 
+                            nrounds = 3000, 
+                            early_stopping_rounds = 100, 
+                            print_every_n = 10)
+
+
+
+#[388]	valid-auc:0.811852
+
+print(xgb.model.binLogit)
+print(xgb.model.binLogit$best_score) 
+xgb.model.binLogit$best_ntreelimit
+
+# save model to binary local file
+xgb.save(xgb.model.binLogit, "xgb_woIDs_0.81AUC_NUM_BinLogit_0530")
+
+
+#Get feature importance
+xgb.feature.imp = xgb.importance(model = xgb.model.binLogit)
+
+
+##########################################################################################
+# Make predictions on validation set for ROC curve
+xgb.valid.acc = predict(xgb.model.binLogit
+                   , newdata = as.matrix(valid[, colnames(valid) != "is_listened"])
+                   , ntreelimit = xgb.model.binLogit$best_ntreelimit)
+
+auc.xgb.acc_v = roc(valid$is_listened, xgb.valid.acc, plot = TRUE, col = "green")
+
+print(auc.xgb.acc_v)
+#0.81
+##########################################################################################
+
+# Make predictions on TEST set 
+xgb.test.acc = predict(xgb.model.binLogit, 
+                       newdata = as.matrix(test[, colnames(test) != "is_listened"]), 
+                       ntreelimit = xgb.model.binLogit$best_ntreelimit)
+
+
+## Create submission file
+submission <- read.csv("~/R/DSG 17/525NewFeats/sample_submission_kaggle.csv")
+submission$is_listened <- xgb.test.acc
+write.csv(submission,"Preds_xgb_without_IDs_0.81AUC_NUM_BinLogit_0530.csv",row.names = FALSE)
+
+
+hist(submission$is_listened, col = "dodgerblue4", main = "Preds distribution | No Ids | XGB BinLogit | 0.81 AUC | 30 feats | All Numeric")
+
+# Score: 0.63073 (Public)	0.63217 (Private)
+```
