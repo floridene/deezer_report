@@ -1,0 +1,73 @@
+#LightGBM Model | 
+#2017-05-27	LGB_Preds_NewData_34Feats.csv	| 
+#Score: 0.62247 (Public)	0.62281 (Private)
+
+```{r}
+#load data (All variables are numeric)
+load("train_test_NUM_20170526_P.rda")
+
+#Split back to train and test
+train = train_test[0:7538916, ]
+validation = train_test[7538917:7558834, ]
+test = train_test[7558835:7578752, ]
+
+test$is_listened = as.factor(test$is_listened)
+str(test)
+
+#Install Microsoft LightGBM package
+# remove.packages("R6")
+devtools::install_github("Microsoft/LightGBM", subdir = "R-package", force = TRUE)
+library(lightgbm)
+
+library(microbenchmark)
+library(pROC)
+
+lgb.train = lgb.Dataset(as.matrix(train[, colnames(train) != "is_listened"]), label = train$is_listened)
+lgb.validation = lgb.Dataset(as.matrix(validation[, colnames(validation) != "is_listened"]), label = validation$is_listened)
+lgb.test = lgb.Dataset(as.matrix(test[, colnames(test) != "is_listened"]), label = test$is_listened)
+
+params.lgb = list(objective = "binary", 
+                  metric = "auc", 
+                  min_data_in_leaf = 1, 
+                  min_hess = 100, 
+                  feature_fraction = 1, 
+                  bagging_fraction = 1, 
+                  bagging_freq = 0)
+
+# Get the time to train the lightGBM model
+lgb.bench = microbenchmark(
+                    	lgb.model <- lgb.train(params = params.lgb, 
+                    	                       data = lgb.train, 
+                    	                       valids = list(validation = lgb.validation), 
+                    	                       learning_rate = 0.01, 
+                    	                       num_leaves = 7, 
+                    	                       num_threads = 4, 
+                    	                       nrounds = 500, 
+                    	                       early_stopping_rounds = 40, 
+                    	                       eval_freq = 10), 
+                    	times = 5L)
+
+print(lgb.bench)
+print(max(unlist(lgb.model$record_evals[["validation"]][["auc"]][["eval"]])))
+
+#CV AUC 0.8204868
+# get feature importance
+lgb.feature.imp = lgb.importance(lgb.model, percentage = TRUE)
+
+# make test predictions
+lgbpreds = predict(lgb.model, data = as.matrix(test[, colnames(test) != "is_listened"]), n = lgb.model$best_iter)
+
+
+submission= read.csv("sample_submission_kaggle.csv")
+submission$is_listened = as.numeric(lgbpreds)
+write.csv(submission,"LGB_Preds_NewData_34Feats.csv",row.names = FALSE)
+
+save(lgb.feature.imp,file="lgb.feature.imp500.rda")
+save(lgb.bench,file="lgb.bench500.rda")
+saveRDS.lgb.Booster(lgb.model, "lgbModel500")
+
+# auc.lgb = roc(test$is_listened, lgbpreds, plot = TRUE, col = "green")
+# print(auc.lgb)
+
+#Score: 0.62247 (Public)	0.62281 (Private)
+```
