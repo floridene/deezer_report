@@ -250,8 +250,6 @@ Therefore, the main challenge of that project was how to model with this amount 
 ```{r}
 corDeezer <- cor(Deezer)
 corrplot(corDeezer, method = "ellipse", type = "full")
-
-?corrplot
 ```
 
 
