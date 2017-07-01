@@ -10,7 +10,7 @@ output:
 ## Slides
 
 - Leaderboard score by submissions
-- Private Leaderboard Score by Models
+- Public Leaderboard Score by Models
 - Public & Private Leaderboard Score by Time and Best Models
 - Private Leaderboard Score by Time and Best Models
 - Leaderboard Rank vs Total Number of Submissions | All teams
