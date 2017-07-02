@@ -9,17 +9,17 @@ output:
 
 ## Slides
 
-- Leaderboard score by submissions
+- Public Leaderboard Score by Submissions
 - Private Leaderboard Score by Models
 - Public & Private Leaderboard Score by Time and Best Models
 - Private Leaderboard Score by Time and Best Models
 - Leaderboard Rank vs Total Number of Submissions | All teams
-- Rank in Germany  by Private Leaderboard Score
+- Rank in Germany by Private Leaderboard Score
 - Table | All submissions
-- Tables | Best models 
+- Table | Best models 
 
 ##
-![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/1.PNG)
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/PublicLB.PNG)
 
 ## Private Leaderboard Score by Models
 ![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/2.PNG)

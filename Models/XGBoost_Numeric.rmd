@@ -1,9 +1,11 @@
-# XGBoost Numeric | Binary Logistic | 2017-05-30 
-#Score: 0.63073 (Public)	0.63217 (Private) 
-#Bin Logit without IDs | AUC 0.81 on validation set
+## XGBoost Numeric | Binary Logistic | 2017-05-30 
+##### Score: 0.63073 (Public)	0.63217 (Private) | AUC 0.81 on validation set
 
 
+
+#### Pre-processing steps 
 ```{r}
+#load libraries
 library(data.table)
 library(jsonlite)
 library(caret)
@@ -179,8 +181,10 @@ summary(train_test)
 
 summary(train_test$media_duration)
 
-Freq_md = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% arrange(desc(total)))
-Freq_md1 = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% arrange(desc(media_duration)))
+Freq_md = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% 
+          arrange(desc(total)))
+Freq_md1 = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% 
+           arrange(desc(media_duration)))
 hist(Freq_md$media_duration)
 
 #Bin by media_duration and user_gender
@@ -231,10 +235,12 @@ summary(train_test)
 
 #complied rda file with 34 features (ALL NUMERIC)
 save(train_test,file="train_test_NUM_20170526_P.rda")
+```
 
 ##############################################
-# Prepare XGBoost numeric model
+## Prepare XGBoost numeric model
 ##############################################
+```{r}
 
 #load data (all numeric)
 load("~/R/DSG 17/525NewFeats/train_test_NUM_20170526_P.rda")
@@ -309,7 +315,8 @@ submission$is_listened <- xgb.test.acc
 write.csv(submission,"Preds_xgb_without_IDs_0.81AUC_NUM_BinLogit_0530.csv",row.names = FALSE)
 
 
-hist(submission$is_listened, col = "dodgerblue4", main = "Preds distribution | No Ids | XGB BinLogit | 0.81 AUC | 30 feats | All Numeric")
+hist(submission$is_listened, col = "dodgerblue4", 
+      main = "Preds distribution | No Ids | XGB BinLogit | 0.81 AUC | 30 feats | All Numeric")
 
 # Score: 0.63073 (Public)	0.63217 (Private)
 ```
