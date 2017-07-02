@@ -71,3 +71,9 @@ saveRDS.lgb.Booster(lgb.model, "lgbModel500")
 
 #Score: 0.62247 (Public)	0.62281 (Private)
 ```
+
+### Feature importance matrix
+
+* LightGBM model with 26 features dated 30th May
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/model_plots/lightgbm_num_26_30th_May.PNG)
+
