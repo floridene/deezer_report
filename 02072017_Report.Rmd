@@ -446,7 +446,7 @@ albums[,'alb.genre2'] <- gsub("\\)", "" , albums[,'alb.genre2']) #remove ")"
 albums[,'alb.genre2'] <- gsub("\"", "" , albums[,'alb.genre2']) #remove """
 albums[,'alb.genre2'] <- gsub(" ", "" , albums[,'alb.genre2']) #remove " "
 
-albums <- splitstackshape::cSplit(albums,splitCols = "alb.genre2",direction = "long")
+albums <- splitstackshape::cSplit(albums,splitCols = "alb.genre2",direction = "wide")
 head(albums$alb.genre2,10)
 ```
 
