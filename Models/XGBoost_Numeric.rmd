@@ -1,8 +1,11 @@
 ## XGBoost Numeric | Binary Logistic | 2017-05-30 
 ##### Score: 0.63073 (Public)	0.63217 (Private) | AUC 0.81 on validation set
 
-* Pre-processing steps 
+
+
+#### Pre-processing steps 
 ```{r}
+#load libraries
 library(data.table)
 library(jsonlite)
 library(caret)
@@ -178,7 +181,8 @@ summary(train_test)
 
 summary(train_test$media_duration)
 
-Freq_md = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% arrange(desc(total)))
+Freq_md = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% 
+          arrange(desc(total)))
 Freq_md1 = as.data.frame(train_test %>% group_by(media_duration) %>% summarise(total = n()) %>% 
            arrange(desc(media_duration)))
 hist(Freq_md$media_duration)
