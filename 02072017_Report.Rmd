@@ -337,7 +337,7 @@ theme_light()
 ggsave("wd_distribution_test.png",plot=gg12, width = 8, height=5, units="in")
 ```
 
-#### 2(b) Beats per Minute
+#### 3 (b) Beats per Minute
 
 Beats per Minute (bpm) is an easy, numeric feature which we could query from the API. We thought it may help us differentiate inside of genres for example "softrock" being tendentially slower (lower bpm) than its assosiated genre "rock". It wasn´t our intention to create subgenres in any way, but just giving this extra information into the model.
 
@@ -375,7 +375,7 @@ hist(as.numeric(tracks$track_bpm))
 To fill the zeros, we will take the mean bpm from the album the media is on, or the genre it is from, if die album information is not available. Sadly, at this point we didn´t had informations about the genre, so in order to keep it chronologically correct and not confusing, we will go to the genre section now and will come back to this afterwards.
 
 
-#### 2(c) Genre_id
+#### 3 (c) Genre_id
 
 In a first approach we tried to get enhanced information about the genre_id, by quering the API for the genre_ids.
 As seen in the visualisation part, we were confronted with a vast amount of genre_id==0 and it would be nice to know which genre it is.
@@ -610,7 +610,7 @@ albums2 <- albums2[!duplicated(albums2$album_id),]
 ```
 
 
-#### 2(d) User clusters by genre
+#### 3 (d) User clusters by genre
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda") #we load a newer version of the data at this stage, but we only build on what has been worked out so far.
@@ -673,7 +673,7 @@ This new feature added to our previously best model increased our score by 4%.
 
 We didn´t stop at this point, since there are some aspects which are worrying. e.g. that we dont take into account the number of observations or how often a genre was played, in contrast, we only look at how often a user has listened to a genre. We kept on developing the idea, which is worth a chapter on its own.
 
-#### 2(e) User Behavior Index
+#### 3 (e) User Behavior Index
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
@@ -900,7 +900,7 @@ behavior[1:10,1:10]
 ```
 
 
-#### 2(f) User Behavior_index for Clustering users
+#### 3 (f) User Behavior_index for Clustering users
 
 Finally we can replace the previous clustering by clustering across the users Behavior_index.
 If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
@@ -959,7 +959,7 @@ The profiles were saved in a lookuptable and joined onto the data.
 Overall, adding the behavior_index as well as behavior_profile increased our accuracy by a significant amount.
 We were lucky and could use the data for g, l and c as additional Features.
 
-#### 2(g) Using the Behavior Architecture to Create Further Features
+#### 3 (g) Using the Behavior Architecture to Create Further Features
 
 A day before the deadline, after the meeting with Prof. Löcher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very timeconsuming.
 For Example: The lookuptable for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
@@ -1059,35 +1059,38 @@ behavior_album_molten <- melt(behavior_album, id.vars="user_id",variable.name="a
 
 Sadly the computation wasn´t fast enough to enable us to get a final prediction with the new features. But we ran some hypertuned models after the competition and will present the results later on.
 
-#### 2(h) Creating the new dataset
+#### 3 (h) Creating the new dataset
 
-*prepare a subset for merging!
+The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we reduced the dataset to 1000 rows for illustrating that the code works.
 
+Loading required data and lookup tables:
 ```{r Loading new lookup tables}
-#Deezer <- read.csv("/home/Deezer/10_Basic_Dataset/train.csv")
-#Deezer_test <- read.csv("/home/Deezer/10_Basic_Dataset/test.csv")
+Deezer <- read.csv("/home/Deezer/10_Basic_Dataset/train.csv")
+Deezer_test <- read.csv("/home/Deezer/10_Basic_Dataset/test.csv")
 
-#load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda") #BPM column
-#load("/home/Deezer/30_Wrangled_Data/album_genre_clean.rda") #new_genre
-#load("/home/Deezer/30_Wrangled_Data/21_05_new_behavior_lookup.rda")
-#load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
+load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda") #BPM column
+load("/home/Deezer/30_Wrangled_Data/album_genre_clean.rda") #new_genre
+load("/home/Deezer/30_Wrangled_Data/21_05_new_behavior_lookup.rda")
+load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
 
-#load("/home/Deezer/30_05_genre_counts_lookup.rda")
-#load("/home/Deezer/30_05_genre_listened_lookup.rda")
-#load("/home/Deezer/30_05_genre_scaled_lookup.rda")
+load("/home/Deezer/30_05_genre_counts_lookup.rda")
+load("/home/Deezer/30_05_genre_listened_lookup.rda")
+load("/home/Deezer/30_05_genre_scaled_lookup.rda")
 
 #load("/home/Deezer/30_05_artist_listened_lookup.rda")
-#load("/home/Deezer/30_05_artist_scaled_lookup.rda")
+#load("/home/Deezer/30_05_artist_scaled_lookup.rda") # woow they take long
 #load("/home/Deezer/30_05_artist_counts_lookup.rda")
-
-#behavior_molten$user_id <- as.integer(as.character(behavior_molten$user_id))
-#cluster_user_lookup$user_id <- as.integer(as.character(cluster_user_lookup$user_id))
 ```
 
-problems which occured while merging data
+```{r}
+Deezer <- Deezer[1:1000,]
+```
+
+The lookup tables already provide the user_ids as factors. However, the datatypes of the competition set has not been modified yet. This means all features are still numeric veriables. We decided to merge the data by the remaining numeric value instead of the factor as the merge itself can be executed quite faster. Therefore, we change the user_id of the lookup tables into numeric values at first. 
+
 ```{r}
 behavior_molten$user_id <- as.integer(as.character(behavior_molten$user_id))
-class(behavior_molten$user_id)
+#class(behavior_molten$user_id)
 
 cluster_user_lookup$user_id <- as.integer(as.character(cluster_user_lookup$user_id))
 
@@ -1111,10 +1114,10 @@ Deezer_test$is_listened = 0
 Deezer$sample_id = NA
 ```
 
-
+We created a merging-function, which does all joins for a preferred dataset. For the demonstration, we just merge the 1000 rows of the Deezer train dataset.
 ```{r}
-dim(Deezer)
-dim(Deezer_test)
+dim(Deezer) #great for checking that number of rows stay constant while merging
+#dim(Deezer_test)
 
 #joining data:
 get_new_data <- function(x) {
@@ -1137,9 +1140,9 @@ get_new_data <- function(x) {
   x <- merge(x, genre_listened.molten , x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
   x <- merge(x, genre_scaled.molten, x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
   x <- merge(x, genre_counts.molten, x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
-  x <- merge(x, artist_counts.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
-  x <- merge(x, artist_scaled.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
-  x <- merge(x, artist_listened.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+ # x <- merge(x, artist_counts.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+  #x <- merge(x, artist_scaled.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+ # x <- merge(x, artist_listened.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
   
   #remove old columns / other columns are deleted below:
   x$genre_id = NULL #delete old genre column
@@ -1149,16 +1152,18 @@ get_new_data <- function(x) {
   return(x)
 }
 
-DeezerNew_train_0621 <- get_new_data(Deezer)
-DeezerNew_test_0621 <- get_new_data(Deezer_test)
+DeezerNew_train_0702 <- get_new_data(Deezer)
+#DeezerNew_test_0702 <- get_new_data(Deezer_test)
 
-dim(DeezerNew_train_0621)
-dim(DeezerNew_test_0621)
+dim(DeezerNew_train_0702)
+#dim(DeezerNew_test_0702)
 
-DeezerNew_test_0621 <- DeezerNew_test_0621 %>%
-  arrange(sample_id)
+#DeezerNew_test_0702 <- DeezerNew_test_0702 %>%
+# arrange(sample_id)
+```
 
-
+It can be seen that the function added 10 new features, while the number of rows stay fixed. However, before we can use the data we have to modify the datatypes. That is done by the next function: data_type_function.
+```{r}
 #converting specific columns in factors
 data_type_function <- function(x){
     cols <- c("media_id", "album_id", "context_type", "platform_name", "platform_family", "listen_type", "user_gender", "user_id", "artist_id", "is_listened", "alb.genre2_01", "wd", "profile_id")
@@ -1166,9 +1171,47 @@ data_type_function <- function(x){
     return(x)
 }
 
-DeezerNew_train_0621 <- data_type_function(DeezerNew_train_0621)
-DeezerNew_test_0621 <- data_type_function(DeezerNew_test_0621)
-#################################
+DeezerNew_train_0702 <- data_type_function(DeezerNew_train_0702)
+#DeezerNew_test_0702 <- data_type_function(DeezerNew_test_0702)
+```
+
+Furthermore we did some additional adjustments. This was caused by merging the new behavior feature. 
+
+0 -> mist
+```{r}
+sum(is.na(DeezerNew_train_0702$behavior))
+```
+
+Checking the NAs for this specific columns reveals the values which could not be joined. The Spelling of the german letters ü and ö letters caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
+
+Hörspiele
+DeutscheHörspiele
+TürkischeVolksmusik
+
+-> As they are not the most important genres, i think we can fill the NAs with 0. Chris' quick and dirty solution)
+
+```{r}
+
+DeezerNew_train_0702 %>%
+  #filter (is.na(DeezerNew_test_0523$behavior))
+
+#Deezer_fail <- DeezerNew_train_0523 %>%
+#  filter (is.na(DeezerNew_train_0523$behavior))
+
+#Deezer_fail %>%
+ # group_by(alb.genre2_01) %>%
+ # summarise (n = n())
+
+#found NAs: ö, ü,... are causing the problems !!!
+
+hist(DeezerNew_train_0702$behavior)
+```
+
+
+
+
+
+```{r}
 ## Unfortunately, we get ~1500 NAs in the DeezerNew_train_0522 dataset and 3 in the test dataset. Therefore, we decided to convert the NAs to 0.
 DeezerNew_train_0530$behavior[is.na(DeezerNew_train_0530$behavior)] <- 0
 DeezerNew_test_0530$behavior[is.na(DeezerNew_test_0530$behavior)] <- 0
@@ -1185,62 +1228,24 @@ DeezerNew_test_0530 <- subset(DeezerNew_test_0530, select = -hh)
 
 ## Combine the files
 DeezerNew_traintest_0621 <- rbind(DeezerNew_train_0621,DeezerNew_test_0621)
+```
 
-
-
+In the end we save the files, which is not needed for the demo version. 
+```{r}
 ## Save the new files
-save(DeezerNew_train_0621, file = "~/30_Wrangled_Data/Deezer_train_0621.rda")
-save(DeezerNew_test_0621, file = "~/30_Wrangled_Data/Deezer_test_0621.rda")
-save(DeezerNew_traintest_0621, file = "~/30_Wrangled_Data/Deezer_traintest_0621.rda")  
-
-################
-remove_columns <- function(x) {
-  x$user_id = NULL 
-  x$media_id = NULL 
-  x$artist_id = NULL 
-  #x$album_id = NULL 
-  return(x)
-}
-
+#save(DeezerNew_train_0621, file = "~/30_Wrangled_Data/Deezer_train_0621.rda")
+#save(DeezerNew_test_0621, file = "~/30_Wrangled_Data/Deezer_test_0621.rda")
+#save(DeezerNew_traintest_0621, file = "~/30_Wrangled_Data/Deezer_traintest_0621.rda")  
 ```
 
-
-#Checking Nas and Data order:
+Load new datatables for the modeling part:
 ```{r}
-tail(DeezerNew_traintest_0530)
+load("/home/Deezer/30_Wrangled_Data/DeezerNew_train_0530.rda")
+load("/home/Deezer/30_Wrangled_Data/DeezerNew_test_0530.rda")
+load("/home/Deezer/30_Wrangled_Data/DeezerNew_traintest_0530")
 ```
 
-Check NAs for behavior column:
--> The problem is the spelling of ü and ö letters. In the lookup table they are written like: "T<fc>rkischeVolksmusik". So the match is not possible at the moment... 
-
-Hörspiele
-DeutscheHörspiele
-TürkischeVolksmusik
--> As they are not the most important genres, i think we can fill the NAs with 0. Chris' quick and dirty solution)
-
-```{r}
-sum(is.na(DeezerNew_traintest_0530$behavior))
-
-#DeezerNew_test_0523 %>%
-  #filter (is.na(DeezerNew_test_0523$behavior))
-
-#Deezer_fail <- DeezerNew_train_0523 %>%
-#  filter (is.na(DeezerNew_train_0523$behavior))
-
-#Deezer_fail %>%
- # group_by(alb.genre2_01) %>%
- # summarise (n = n())
-
-#found NAs: ö, ü,... are causing the problems !!!
-
-hist(DeezerNew_traintest_0530$behavior)
-```
-
-
-
-
-
-##3. Modeling
+##4. Modeling
 
 Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models).
 
@@ -1250,7 +1255,7 @@ As gradient boosted trees are extremely powerful and win many kaggle competition
 
 Furthermore, we also tried a Naive Bayes and Deep Learning approach. Other libraries to build these models include h2o, lightgbm and naivebayes. In the end though, our best model submitted was based on xgboost. Let us take you through the model building process in the following chapter.
 
-#### 3(a) xgboost
+#### 4(a) xgboost
 
 Before xgboost can be used, we needed to set up the data one more time. That is because xgboost cannot handle factors. Our dataset included many factors though. There are two ways dealing with this issue. 
 
@@ -1341,12 +1346,12 @@ best_parameters <- data.frame(best_param, best_CVround)
 write.csv(best_parameters, file = "best_parameters_FinalCV.csv")
 ```
 
-#### 3(b) ...
-#### 3(c) best model
+#### 4 (b) ...
+#### 4 (c) best model
 
-##Reflection
+##5. Reflection
 
-##Team effot
+##6. Team effot
 
 
 
