@@ -325,6 +325,11 @@ hist(submission$is_listened, col = "dodgerblue4",
 * XGB Numeric model with 49 features dated 13th May
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/model_plots/xgb_num_49_13th_May.PNG)
 
+
+#### "Every little improvement in accuracy matters!"
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/model_plots/14XGB_score.PNG)
+
+
 * XGB Numeric model with 33 features dated 18th May
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/model_plots/xgb_num_33_18th_May.PNG)
 
