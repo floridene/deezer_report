@@ -1061,7 +1061,7 @@ Sadly the computation wasn´t fast enough to enable us to get a final prediction
 
 #### 3 (h) Creating the new dataset
 
-The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we reduced the dataset to 1000 rows for illustrating that the code works.
+The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we execute the code just for the test dataset for illustrating that it works.
 
 Loading required data and lookup tables:
 ```{r Loading new lookup tables}
@@ -1080,10 +1080,6 @@ load("/home/Deezer/30_05_genre_scaled_lookup.rda")
 #load("/home/Deezer/30_05_artist_listened_lookup.rda")
 #load("/home/Deezer/30_05_artist_scaled_lookup.rda") # woow they take long
 #load("/home/Deezer/30_05_artist_counts_lookup.rda")
-```
-
-```{r}
-Deezer <- Deezer[1:1000,]
 ```
 
 The lookup tables already provide the user_ids as factors. However, the datatypes of the competition set has not been modified yet. This means all features are still numeric veriables. We decided to merge the data by the remaining numeric value instead of the factor as the merge itself can be executed quite faster. Therefore, we change the user_id of the lookup tables into numeric values at first. 
@@ -1110,14 +1106,13 @@ artist_scaled.molten$artist_id <- as.integer(as.character(artist_scaled.molten$a
 
 #Due to the fact that we had problems while removing sample_id, i created a NA column for train data as well. 
 Deezer_test$is_listened = 0
-#Deezer_test$sample_id = NULL
 Deezer$sample_id = NA
 ```
 
 We created a merging-function, which does all joins for a preferred dataset. For the demonstration, we just merge the 1000 rows of the Deezer train dataset.
 ```{r}
-dim(Deezer) #great for checking that number of rows stay constant while merging
-#dim(Deezer_test)
+#dim(Deezer) #great for checking that number of rows stay constant while merging
+dim(Deezer_test)
 
 #joining data:
 get_new_data <- function(x) {
@@ -1152,14 +1147,14 @@ get_new_data <- function(x) {
   return(x)
 }
 
-DeezerNew_train_0702 <- get_new_data(Deezer)
-#DeezerNew_test_0702 <- get_new_data(Deezer_test)
+#DeezerNew_train_0702 <- get_new_data(Deezer)
+DeezerNew_test_0702 <- get_new_data(Deezer_test)
 
-dim(DeezerNew_train_0702)
-#dim(DeezerNew_test_0702)
+#dim(DeezerNew_train_0702)
+dim(DeezerNew_test_0702)
 
-#DeezerNew_test_0702 <- DeezerNew_test_0702 %>%
-# arrange(sample_id)
+DeezerNew_test_0702 <- DeezerNew_test_0702 %>%
+ arrange(sample_id)
 ```
 
 It can be seen that the function added 10 new features, while the number of rows stay fixed. However, before we can use the data we have to modify the datatypes. That is done by the next function: data_type_function.
@@ -1171,71 +1166,56 @@ data_type_function <- function(x){
     return(x)
 }
 
-DeezerNew_train_0702 <- data_type_function(DeezerNew_train_0702)
-#DeezerNew_test_0702 <- data_type_function(DeezerNew_test_0702)
+#DeezerNew_train_0702 <- data_type_function(DeezerNew_train_0702)
+DeezerNew_test_0702 <- data_type_function(DeezerNew_test_0702)
 ```
 
-Furthermore we did some additional adjustments. This was caused by merging the new behavior feature. 
+Furthermore we did some additional adjustments. This was caused by merging the new behavior feature. For the test data we gain 4 NAs which might not be problematic as they are so less. However, in the train data set this effect occurs 1500 times. 
 
-0 -> mist
 ```{r}
-sum(is.na(DeezerNew_train_0702$behavior))
+sum(is.na(DeezerNew_test_0702$behavior))
 ```
 
-Checking the NAs for this specific columns reveals the values which could not be joined. The Spelling of the german letters ü and ö letters caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
-
-Hörspiele
-DeutscheHörspiele
-TürkischeVolksmusik
-
--> As they are not the most important genres, i think we can fill the NAs with 0. Chris' quick and dirty solution)
+Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters ü and ö letters have caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
 
 ```{r}
+Deezer_fail <- DeezerNew_test_0702 %>%
+  filter(is.na(DeezerNew_test_0702$behavior))
 
-DeezerNew_train_0702 %>%
-  #filter (is.na(DeezerNew_test_0523$behavior))
-
-#Deezer_fail <- DeezerNew_train_0523 %>%
-#  filter (is.na(DeezerNew_train_0523$behavior))
-
-#Deezer_fail %>%
- # group_by(alb.genre2_01) %>%
- # summarise (n = n())
-
-#found NAs: ö, ü,... are causing the problems !!!
-
-hist(DeezerNew_train_0702$behavior)
+Deezer_fail %>%
+  group_by(alb.genre2_01) %>%
+  summarise (n = n())
 ```
 
-
-
-
+These genres are not that important for the modeling part. Also, they occur just 1500 times out of 7.5 million rows. Therefore, we decided to fill the NAs with a listening behavior of 0. 
 
 ```{r}
-## Unfortunately, we get ~1500 NAs in the DeezerNew_train_0522 dataset and 3 in the test dataset. Therefore, we decided to convert the NAs to 0.
-DeezerNew_train_0530$behavior[is.na(DeezerNew_train_0530$behavior)] <- 0
-DeezerNew_test_0530$behavior[is.na(DeezerNew_test_0530$behavior)] <- 0
+#DeezerNew_train_0702$behavior[is.na(DeezerNew_train_0702$behavior)] <- 0
+DeezerNew_test_0702$behavior[is.na(DeezerNew_test_0702$behavior)] <- 0
+```
 
+In the end of our project we also add new time information to our models. These features are also added to the models. 
+```{r}
 ## Add time as circular value
-DeezerNew_train_0530$xhh <- sin(2 * pi * DeezerNew_train_0530$hh / 24)
-DeezerNew_train_0530$yhh <- cos(2 * pi * DeezerNew_train_0530$hh / 24)
-DeezerNew_test_0530$xhh <- sin(2 * pi * DeezerNew_test_0530$hh / 24)
-DeezerNew_test_0530$yhh <- cos(2 * pi * DeezerNew_test_0530$hh / 24)
+#DeezerNew_train_0702$xhh <- sin(2 * pi * DeezerNew_train_0702$hh / 24)
+#DeezerNew_train_0702$yhh <- cos(2 * pi * DeezerNew_train_0702$hh / 24)
+DeezerNew_test_0702$xhh <- sin(2 * pi * DeezerNew_test_0702$hh / 24)
+DeezerNew_test_0702$yhh <- cos(2 * pi * DeezerNew_test_0702$hh / 24)
 
 ## Delete the hh column
-DeezerNew_train_0530 <- subset(DeezerNew_train_0530, select = -hh)
-DeezerNew_test_0530 <- subset(DeezerNew_test_0530, select = -hh)
-
-## Combine the files
-DeezerNew_traintest_0621 <- rbind(DeezerNew_train_0621,DeezerNew_test_0621)
+#DeezerNew_train_0702 <- subset(DeezerNew_train_0702, select = -hh)
+DeezerNew_test_0702 <- subset(DeezerNew_test_0702, select = -hh)
 ```
 
-In the end we save the files, which is not needed for the demo version. 
+In the end both files are combined. This was needed for hot endcoding and creating the belonging sparse matrix. Afterwards, all three new datasets are saved. 
 ```{r}
+## Combine the files
+#DeezerNew_traintest_0702 <- rbind(DeezerNew_train_0621,DeezerNew_test_0702)
+
 ## Save the new files
-#save(DeezerNew_train_0621, file = "~/30_Wrangled_Data/Deezer_train_0621.rda")
-#save(DeezerNew_test_0621, file = "~/30_Wrangled_Data/Deezer_test_0621.rda")
-#save(DeezerNew_traintest_0621, file = "~/30_Wrangled_Data/Deezer_traintest_0621.rda")  
+#save(DeezerNew_train_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_train_0702.rda")
+#save(DeezerNew_test_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_test_0702.rda")
+#save(DeezerNew_traintest_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_traintest_0702.rda")  
 ```
 
 Load new datatables for the modeling part:
