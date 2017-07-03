@@ -1,0 +1,9 @@
+
+----------------------------------------------------------------------------
+### Specifications of Machine used for most XGBoost NUM, H2O and LightGBM models
+----------------------------------------------------------------------------
+
+
+Operating System | System Model | Processor | Memory
+--- | --- | --- | --- 
+Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz (4 CPUs), ~2.9GHz | 16 GB RAM
