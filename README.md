@@ -17,7 +17,7 @@ This was international student competition where more than 220 universities and 
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
   * [XGBoost Numeric model](https://github.com/pranavpandya84/deezer_report/blob/master/Models/XGBoost_Numeric.rmd)
   * [LightGBM](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LightGBM.rmd)
-  * [H2O Automated Machine Learning - Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
+  * [H2O Automated Machine Learning](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
   * [H2O Distsributed Random Forest- Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DRF%2023rd%20May/screenshots.rmd)
   * [H2O Deep Learning - Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/Screenshots.rmd) 
 * [Dropbox link to the data](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
