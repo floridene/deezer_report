@@ -1,9 +1,19 @@
 
 ----------------------------------------------------------------------------
-### Specifications of Machine used for most XGBoost NUM, H2O and LightGBM models
+### Specifications of machine used for most XGBoost NUM, H2O and LightGBM models
 ----------------------------------------------------------------------------
 
 
 Operating System | System Model | Processor | Memory
 --- | --- | --- | --- 
 Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz (4 CPUs), ~2.9GHz | 16 GB RAM
+
+----------------------------------------------------------------------------
+### Specifications of machine used for XGBoost Sparse models
+----------------------------------------------------------------------------
+* Dell PowerEdge R730 server 
+* Two Intel Xeon E5-2695 v3 processors
+* 56 Cores
+* 512 GB main memory
+* 14 TB HDD storage 
+* NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory 
