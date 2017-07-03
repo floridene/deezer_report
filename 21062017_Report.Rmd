@@ -18,8 +18,8 @@ In the end of the project we achieved the place 66 out of 145 teams with 45 subm
 Therefore, the report will give a short introduction to the dataset at first. Sequentially, our approaches in the field of feature engineering are explained and the used prediction models are presented.  
 
 The libraries were used for the project are the following: 
-```{r Initialization, echo=FALSE, warning=FALSE, message=FALSE}
-#if (!require("pacman")) install.packages("pacman")
+```{r Initialization, echo=FALSE, message=FALSE, warning=FALSE}
+if (!require("pacman")) install.packages("pacman")
 pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot)
 #library(ggplot2)
 #library(dplyr)
@@ -171,7 +171,18 @@ number_genre <- Deezer %>%
   arrange(-n)
 head(number_genre)
 
-ggplot(number_genre, aes(genre_id)) + geom_histogram() # ggplot is fucked for my account-.. i dont know what happened
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],50))
+
+hist(Deezer$genre_id)
+
+gg14 <-ggplot(Deezer, aes(x=genre_id))+geom_density(fill="#4292C6")+scale_x_continuous(limits=c(0,100))+
+labs(y="logarithmic observations",
+      x="genre_id",
+      title="Logarithmic Distribution of Genre_id",
+      caption="Source: Deezer train data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggsave("distribution_original_genre.png",plot=gg14, width = 8, height=5, units="in")
 ```
 
   
@@ -479,7 +490,7 @@ as we can see, we have 20521 rows in Na.albums which means that we have 20521 al
 all2 <- all %>% select(album_id,artist_id) #subset all
 all2 <- left_join(all2,albums2[,c(1,4)],by="album_id") #joining our new genre
 
-#creating artists loopuptable
+#creating artists lookuptable
 loup.artists <- all2 %>%
   group_by(artist_id,alb.genre2_01) %>%
   summarise(n=n()) %>% #how often a genre at a artist appears. btw: listened/played songs more important than overall genres from albums released
@@ -574,6 +585,7 @@ dev.off()
 Note that this code will run for some minutes, you can skip the following two chunks without missing something crucial.
 
 ```{r}
+
 test.loop <- tracks_clean %>% filter(is.na(alb.genre2_01)) %>% select(album_id,track_bpm)
 results <- test.loop
 
@@ -586,6 +598,8 @@ fit <- glm(y~track_bpm,data=train.loop, family=binomial(link = "logit"))
 results[,i] <- predict(fit,test.loop, type="response")
 }
 results <- results[,-2]
+
+save(results, file="results.rda")
 ```
 
 At this point we
