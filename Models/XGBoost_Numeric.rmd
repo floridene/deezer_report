@@ -1,6 +1,7 @@
 ## XGBoost Numeric | Binary Logistic | 2017-05-30 
 ##### Score: 0.63073 (Public)	0.63217 (Private) | AUC 0.81 on validation set
 
+#### Use Zeno server (Deezer account) to replicate steps
 
 #### Pre-processing step
 ```{r}
