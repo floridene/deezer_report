@@ -13,7 +13,11 @@ install.packages("h2o", type="source", repos="https://h2o-release.s3.amazonaws.c
 
 #Launch an H2O cluster on localhost
 library(h2o)
-h2o.init(nthreads=-1, max_mem_size = "16g", enable_assertions = FALSE)
+#for local system change the max_mem_size below:
+#h2o.init(nthreads=-1, max_mem_size = "16g", enable_assertions = FALSE)
+
+#on zeno server:
+h2o.init(nthreads=-1, max_mem_size = "300g", enable_assertions = FALSE)
 
 #Import the data into H2O
 train_test<-h2o.uploadFile("~/60_data_other_models/train_test_0531.csv",destination_frame = "train.hex")
@@ -52,7 +56,7 @@ write.csv(submission,"h2o_autoML_0531data_AUC_mrnt3600.csv",row.names = FALSE)
 
 hist(submission$is_listened)
 
-#score: 0.64223	0.63646
+#score: 0.64223	(Public), 0.63646 (Private)
 
 # h2o.shutdown()
 ```
