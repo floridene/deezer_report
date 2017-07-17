@@ -1,4 +1,4 @@
-# H2O Automated Machine Learning Model (31st May data) | time: 90 mins | 14.22 GB cluster
+## H2O Automated Machine Learning Model (31st May data) | time: 90 mins | 14.22 GB cluster
 
 ```{r}
 ## h2o installation on R
@@ -11,14 +11,12 @@ for (pkg in pkgs) { if (! (pkg %in% rownames(installed.packages()))) { install.p
 install.packages("h2o", type="source", repos="https://h2o-release.s3.amazonaws.com/h2o/rel-vapnik/1/R")
 
 
-setwd("~/R/DSG 17/525NewFeats/H2O_Auto_ML")
-
 #Launch an H2O cluster on localhost
 library(h2o)
 h2o.init(nthreads=-1, max_mem_size = "16g", enable_assertions = FALSE)
 
 #Import the data into H2O
-train_test<-h2o.uploadFile("train_test_0531.csv",destination_frame = "train.hex")
+train_test<-h2o.uploadFile("~/60_data_other_models/train_test_0531.csv",destination_frame = "train.hex")
 
 train_test$user_id = NULL
 train_test$is_listened = as.factor(train_test$is_listened)
@@ -48,7 +46,7 @@ aml@leader
 pred <- h2o.predict(aml@leader, test)
 pred = as.data.frame(pred)
 
-submission= read.csv("sample_submission_kaggle.csv")
+submission= read.csv("~/60_data_other_models/sample_submission_kaggle.csv")
 submission$is_listened = pred$p1
 write.csv(submission,"h2o_autoML_0531data_AUC_mrnt3600.csv",row.names = FALSE)
 
@@ -61,7 +59,7 @@ hist(submission$is_listened)
 
 
 #######################################################
-# h2O autoML details of best model (autoML stacked_Ensemble 3600)
+## h2O autoML: details of best model (autoML stacked_Ensemble 3600)
 #######################################################
 
 ```{r}
