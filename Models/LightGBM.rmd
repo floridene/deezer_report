@@ -1,9 +1,10 @@
 # LightGBM Model
 #### 2017-05-27	LGB_Preds_NewData_34Feats.csv	| Score: 0.62247 (Public)	0.62281 (Private)
 
+#### Use Zeno server (Deezer account) to replicate steps
 ```{r}
 #load data (All variables are numeric)
-load("train_test_NUM_20170526_P.rda")
+load("~/60_data_other_models/train_test_NUM_20170526_P.rda")
 
 #Split back to train and test
 train = train_test[0:7538916, ]
@@ -58,7 +59,7 @@ lgb.feature.imp = lgb.importance(lgb.model, percentage = TRUE)
 lgbpreds = predict(lgb.model, data = as.matrix(test[, colnames(test) != "is_listened"]), n = lgb.model$best_iter)
 
 
-submission= read.csv("sample_submission_kaggle.csv")
+submission= read.csv("~/60_data_other_models/sample_submission_kaggle.csv")
 submission$is_listened = as.numeric(lgbpreds)
 write.csv(submission,"LGB_Preds_NewData_34Feats.csv",row.names = FALSE)
 

@@ -1,1 +1,7 @@
-[Dropbox link to the data](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
+### Data used for XGBoost Numeric (label encoded), H2O and LightGBM models
+
+#### On Zeno server:
+- In Deezer account and under the folder "60_data_other_models"  
+
+#### To download and try on local system:
+- [Dropbox link to the data](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)

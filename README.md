@@ -20,7 +20,8 @@ This was international student competition where more than 220 universities and 
   * [H2O Automated Machine Learning](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
   * [H2O Distsributed Random Forest- Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DRF%2023rd%20May/screenshots.rmd)
   * [H2O Deep Learning - Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/Screenshots.rmd) 
-* [Dropbox link to the data](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
+* [Data used for other models](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
+(Data has also been put in zeno server under "60_data_other_models" and steps from above scripts/ models can be replicated. Dropbox link is to download data and try models locally without need of server.)
 
 ## Statistics about this competition:
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/deezer_poster1.png)

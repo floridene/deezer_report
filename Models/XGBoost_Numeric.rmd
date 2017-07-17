@@ -1,6 +1,7 @@
 ## XGBoost Numeric | Binary Logistic | 2017-05-30 
 ##### Score: 0.63073 (Public)	0.63217 (Private) | AUC 0.81 on validation set
 
+#### Use Zeno server (Deezer account) to replicate steps
 
 #### Pre-processing step
 ```{r}
@@ -24,13 +25,13 @@ Feature Engineering
 #####################################################################################
 
 #load data (prepared as on 25th May)
-load("~/R/DSG 17/525NewFeats/Deezer_train_0525.rda")
-load("~/R/DSG 17/525NewFeats/Deezer_test_0525.rda")
+load("~/60_data_other_models/Deezer_train_0525.rda")
+load("~/60_data_other_models/Deezer_test_0525.rda")
 
 # naming for model
 train = DeezerNew_train_0525
 test = DeezerNew_test_0525
-submission= read.csv("sample_submission_kaggle.csv")
+submission= read.csv("~/60_data_other_models/sample_submission_kaggle.csv")
 
 #label (variable to predict)
 y_train = train$is_listened
@@ -87,7 +88,7 @@ train_test$binRYear= ifelse(train_test$ryear  > 2017, "Outliers",
 
 
 # Add new features: join json file with media description (categorical variables)
-extra = stream_in(file("~/R/DSG 17/data/extra_infos.json"))
+extra = stream_in(file("~/60_data_other_models/extra_infos.json"))
 
 str(extra)
 
@@ -242,7 +243,7 @@ save(train_test,file="train_test_NUM_20170526_P.rda")
 ```{r}
 
 #load data (all numeric)
-load("~/R/DSG 17/525NewFeats/train_test_NUM_20170526_P.rda")
+load(~/60_data_other_models/train_test_NUM_20170526_P.rda")
 
 #response variable
 str(train_test$is_listened)
