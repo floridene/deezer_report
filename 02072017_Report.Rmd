@@ -260,7 +260,7 @@ In this part, we will talk about our Feature Engineering. We will start with eas
 
 Converting the Timestamp is the most basic feature engineering we have done. We extract Hour of Day as well as weekday from the timestamp. This procedure is so easy, that we did it on the fly, as you will see at the end of the feature engineering section. Nethertheless, here is what will happen.
 
-The idea behind that is the assumption, that the Hour of a Day or/and the Day of Week contributes patterns to the prediction, e.g. if user goes regularly to the gym in the on tuesday and thursday at 8pm. This pattern cannot be found with a second precision. 
+The idea behind that is the assumption, that the Hour of a Day or/and the Day of Week contributes patterns to the prediction, e.g. if user goes regularly to the gym on tuesday and thursday at 8pm, or if users tend to listen to slower songs in the evening, while they could listen to fast songs on the way to work. This patterns cannot be found with a time precision of seconds. 
 
 ```{r}
 transforming_timestamp <- function(x){
@@ -374,8 +374,22 @@ hist(as.numeric(tracks$track_bpm))
 
 To fill the zeros, we will take the mean bpm from the album the media is on, or the genre it is from, if die album information is not available. Sadly, at this point we didn´t had informations about the genre, so in order to keep it chronologically correct and not confusing, we will go to the genre section now and will come back to this afterwards.
 
+#### 3 (c) Discarded: EchoNest, singer's gender, users age, user's language vs. song language, sentiment of title
 
-#### 3 (c) Genre_id
+For increasing the available information we looked for additional sources, like API provider. And we found EchoNest and an R interface (https://github.com/mukul13/rechonest). EchoNest provides a lot of information about songs, albums, artists, etc. Unfortunately, EchoNest was bought by Deezers market competitor Spotify. Furthermore, we found a hint in the DSG forum, that we can use the Deezer API, but are not allowed to use other sources.
+
+In a brainstorming we thought about additional factors, which influences, if we want to listen to a song or not. One aspect is the timbre of a voice or the gender of an artist, e.g. in combination with a genre. Since we were not allowed to use EchoNest and these information are not available in Deezers API, we discarded this idea.
+
+If one is thinking to the parents music taste, one could claim, that elder people tend to listen to older songs. One explanation could be, that user tend to listen to songs from their "youth". The question was, if the properties user_age and year of release_date correlate. Unfortunately, user_age and release_date were not significant in our first models.
+
+User's language vs. song language
+ToDo: Pranav, what happend with that approach?
+
+Sentiment analysis of song titles
+ToDo: Max, you thought about that once...
+
+
+#### 3 (d) Genre_id
 
 In a first approach we tried to get enhanced information about the genre_id, by quering the API for the genre_ids.
 As seen in the visualisation part, we were confronted with a vast amount of genre_id==0 and it would be nice to know which genre it is.
@@ -611,7 +625,7 @@ albums2 <- albums2[!duplicated(albums2$album_id),]
 ```
 
 
-#### 3 (d) User clusters by genre
+#### 3 (e) User clusters by genre
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda") #we load a newer version of the data at this stage, but we only build on what has been worked out so far.
@@ -675,7 +689,7 @@ This new feature added to our previously best model increased our score by 4%.
 
 We didn´t stop at this point, since there are some aspects which are worrying. e.g. that we don't take into account the number of observations or how often a genre was played, in contrast, we only look at how often a user has listened to a genre. We kept on developing the idea, which is worth a chapter on its own.
 
-#### 3 (e) User Behavior Index
+#### 3 (f) User Behavior Index
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
@@ -905,7 +919,7 @@ behavior[1:10,1:10]
 ```
 
 
-#### 3 (f) User Behavior Index for Clustering users
+#### 3 (g) User Behavior Index for Clustering users
 
 Finally, we can replace the previous clustering by clustering across the users Behavior_index.
 If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
@@ -964,7 +978,7 @@ The profiles were saved in a lookuptable and joined onto the data.
 Overall, adding the behavior_index as well as behavior_profile increased our accuracy by a significant amount.
 We were lucky and could use the data for g, l and c as additional Features.
 
-#### 3 (g) Using the Behavior Architecture to Create Further Features
+#### 3 (h) Using the Behavior Architecture to Create Further Features
 
 A day before the deadline, after the meeting with Prof. Löcher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very timeconsuming.
 For Example: The lookup table for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
@@ -1064,7 +1078,7 @@ behavior_album_molten <- melt(behavior_album, id.vars="user_id",variable.name="a
 
 Sadly the computation wasn´t fast enough to enable us to get a final prediction with the new features. But we ran some hypertuned models after the competition and will present the results later on.
 
-#### 3 (h) Creating the new dataset
+#### 3 (i) Creating the new dataset
 
 The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we execute the code just for the test dataset for illustrating that it works.
 
@@ -1348,7 +1362,20 @@ write.csv(best_parameters, file = "best_parameters_FinalCV.csv")
 * [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
 
+#### 4 (d) Caret
+
+Caret is...
+
+But if we tried to use that, the following error occured: "At least one of the class levels is not a valid R variable name; This will cause errors when class probabilities are generated because the variables names will be converted to X0, X1 . Please use factor levels that can be used as valid R variable names". But if we used make.names() as suggested, it's output was identical to the 
+
+
+#### 4 (e) SAP Predictive Analysis
+
 ## 5. Reflection
+
+- Insufficient computational power (shared server; other groups; Löcher itself; R is mostly one cored)
+- Missing domain knowledge about music and listening behavior
+- Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
 
 ## 6. Team effot
 
