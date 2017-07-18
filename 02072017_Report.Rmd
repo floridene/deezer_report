@@ -809,7 +809,7 @@ sum(scaled$user_id!=listened$user_id)
 sum(scaled$user_id!=counts$user_id)
 ```
 
-In our last step we combined the three different values, so show you our thoughtprocess throughout the report, we will show you how the combination changed over some testing and iterative feedback rounds.
+In our last step we combined the three different values. To show you our thought process throughout the report, we will show you how the combination changed over some testing and iterative feedback rounds.
 
 To demonstrate what drove the changes, we will create a set of easy example data. Where:
 
@@ -820,15 +820,15 @@ c <- c(200,68,45,19) #Count
 ```
 
 Our first approach was g*l*sqrt(c)
-using c as a weight to get higher indexvalues when we have more data available. We had never the intention to keep the value inside a 0:1 boundry
+using c as a weight to get higher index values, when we have more data available. We had never the intention to keep the value inside a 0:1 boundry
 
 ```{r}
 g*l*sqrt(c)
 ```
 
-As we can see, there is not enough emphasis on the last case. The last genre has 95% listening rate over 19 ovservations, if this genre would be played again, we could pretty sure predict that the user is going to listen to it.
+As we can see, there is not enough emphasis on the last case. The last genre has 95% listening rate over 19 observations, if this genre would be played again, we could pretty sure predict, that the user is going to listen to it.
 
-Additionally case 1 still hase the second highest value, which should indicate a high likelyhood of "is_listened" for a future song of this genre. But the listening value is only 0.25 which indicates, that it is rather unlikely, that the user is going to listen to the genre next time.
+Additionally case 1 still has the second highest value, which should indicate a high likelyhood of "is_listened" for a future song of this genre. But the listening value is only 0.25, which indicates, that it is rather unlikely, that the user is going to listen to the genre next time.
 
 In a first step, we exchanged the sqrt() to a log(x+1) function, which gives less weight relatively to the growth in count, the +1 inside the log is needed because log(0) otherwise would lead to -Inf.
 
@@ -845,12 +845,14 @@ g*l*log(c+1)
 We can see, that the values are closer together now, still, the log is a strong enough penalty for low count cases.
 As wanted, case 1 has a lower value than before, since we don´t give him that much weight through his high n.
 
-Since we wanted more emphasis on the listening history, we thought about assigning a weight manualy, something like:
+Since we wanted more emphasis on the listening history, we thought about assigning a weight manually, something like:
+
 ```{r}
 weight =5
 g*(l*weight)*log(c+1)
 ```
-But tweaking a imaginairy value isn´t what we wanted to do. A more solid way of getting more emphasis on the listening behavior, was to shrink the g by using the sqrt(g). The Squareroot performed well, because g is ranged between 1:0, so sqrt(max(g))==1 and sqrt(min(g))==0 and every value for g which is <1 will get smaller, which in turn is more weight on l. Additionally it has a stronger impact on lower values, which is a benefitial sideeffect.
+
+But tweaking a imaginairy value isn't what we wanted to do. A more solid way of getting more emphasis on the listening behavior, was to shrink the g by using the sqrt(g). The Squareroot performed well, because g is ranged between 1:0, so sqrt(max(g))==1 and sqrt(min(g))==0 and every value for g which is <1 will get smaller, which in turn is more weight on l. Additionally it has a stronger impact on lower values, which is a benefitial side effect.
 
 ```{r}
 plot(sqrt(seq(1,0,length.out = 100)))
@@ -861,7 +863,7 @@ plot(sqrt(seq(1,0,length.out = 100)))
 sqrt(g)*l*log(c+1)
 ```
 
-In this final version we can see, that case 4 is more important than case 1, but still, due to the small samplesize not too overdone.
+In this final version we can see, that case 4 is more important than case 1, but still, due to the small sample size not too overdone.
 
 Here is the final code, which computes the behavior_index:
 ```{r}
@@ -896,21 +898,21 @@ ggsave("sqrt.png",plot=gg6, width = 8, height=5, units="in")
 ```
 
 As you can imagine, the Behavior-Matrix is sparsely filled, since unlistened genres are set to 0, because g will be 0, even if c is not.
-Higher values of Behavior_index for a genre is indicating a higher likelyhood of getting heard again by the user, while values close to 0 are indicating a low likelyhood respectively. We used the data for clustering as well as a feature itself. To use it as a feature we melt() the matrix and saved it as a lookuptable, which we will later left join to the data using user_id and genre_id as a key.
+Higher values of Behavior_index for a genre is indicating a higher likelihood of getting heard again by the user, while values close to 0 are indicating a low likelihood, respectively. We used the data for clustering as well as a feature itself. To use it as a feature we melt() the matrix and saved it as a lookup table, which we will later left join to the data using user_id and genre_id as a key.
 
 ```{r}
 behavior[1:10,1:10]
 ```
 
 
-#### 3 (f) User Behavior_index for Clustering users
+#### 3 (f) User Behavior Index for Clustering users
 
-Finally we can replace the previous clustering by clustering across the users Behavior_index.
+Finally, we can replace the previous clustering by clustering across the users Behavior_index.
 If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
 
 
 
-We want to use this journey back into out beginnings to show how different clustering methods looked like. Finally tho, we used the method "complete" and set the cutoff point to 35 clusters.
+We want to use this journey back into our beginnings to show how different clustering methods looked like. In the end, we used the method "complete" and set the cutoff point to 35 clusters.
 
 ```{r}
 d <- dist(behavior[,-47]) 
@@ -965,7 +967,7 @@ We were lucky and could use the data for g, l and c as additional Features.
 #### 3 (g) Using the Behavior Architecture to Create Further Features
 
 A day before the deadline, after the meeting with Prof. Löcher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very timeconsuming.
-For Example: The lookuptable for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
+For Example: The lookup table for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
 
 ```{r eval=FALSE}
 profs <- DeezerNew_train_0525 %>% 
@@ -1112,7 +1114,8 @@ Deezer_test$is_listened = 0
 Deezer$sample_id = NA
 ```
 
-We created a merging-function, which does all joins for a preferred dataset. For the demonstration, we just merge the 1000 rows of the Deezer train dataset.
+We created a merging function, which does all joins for a preferred dataset. For the demonstration, we just merge the 1000 rows of the Deezer train dataset.
+
 ```{r}
 #dim(Deezer) #great for checking that number of rows stay constant while merging
 dim(Deezer_test)
@@ -1160,7 +1163,8 @@ DeezerNew_test_0702 <- DeezerNew_test_0702 %>%
  arrange(sample_id)
 ```
 
-It can be seen that the function added 10 new features, while the number of rows stay fixed. However, before we can use the data we have to modify the datatypes. That is done by the next function: data_type_function.
+It can be seen, that the function added 10 new features, while the number of rows stay fixed. However, before we can use the data we have to modify the datatypes. That is done by the next function: data_type_function.
+
 ```{r}
 #converting specific columns in factors
 data_type_function <- function(x){
@@ -1179,7 +1183,7 @@ Furthermore we did some additional adjustments. This was caused by merging the n
 sum(is.na(DeezerNew_test_0702$behavior))
 ```
 
-Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters ü and ö letters have caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
+Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters ü and ö letters had caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
 
 ```{r}
 Deezer_fail <- DeezerNew_test_0702 %>%
@@ -1198,6 +1202,7 @@ DeezerNew_test_0702$behavior[is.na(DeezerNew_test_0702$behavior)] <- 0
 ```
 
 In the end of our project we also add new time information to our models. These features are also added to the models. 
+
 ```{r}
 ## Add time as circular value
 #DeezerNew_train_0702$xhh <- sin(2 * pi * DeezerNew_train_0702$hh / 24)
