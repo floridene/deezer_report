@@ -65,11 +65,15 @@ Device specific:
   * platform_family - type of device
   
 Other features:
-  * ts_listen - timestamp of the listening in UNIX time (time since 1970-01-01 00:00, usually in seconds, sometime with milliseconds)
+  * ts_listen - timestamp of the listening in UNIX time
   * listen_type - if the songs was listened in a flow or not
   
 Response variable:
+<<<<<<< HEAD
+  * is_listened - 1 if the track was listened (30 seconds were listened), 0 otherwise
+=======
   * is_listened - 1 if the track was listened longer than 30 seconds, 0 otherwise
+>>>>>>> ff0b6a85794dbbca601ff88e7a73e50b38c2f70a
 
 ####2(a) User specific features
 
@@ -103,7 +107,11 @@ The data reflects the listening behavior of male and female users. However, in t
 plot(as.factor(Deezer$user_gender))
 ```
 
+<<<<<<< HEAD
+The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)`. 50% of all users are `r round(median(Deezer$user_age))` at least years old. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of all users are 24 years and older. The feature age does not contain any NAs in the Deezer dataset.
+=======
 The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)`. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of the users are 24 years old or younger. The feature age does not contain any NAs in the Deezer dataset.
+>>>>>>> ff0b6a85794dbbca601ff88e7a73e50b38c2f70a
 
 ```{r}
 round(median(Deezer$user_age))
@@ -161,8 +169,34 @@ hist(Deezer$album_id)
 hist(Deezer$artist_id)
 ```
 
+<<<<<<< HEAD
 Likewise, `r length(unique(Deezer$genre_id))` different genres exist in the dataset. The histogram shows clearly that one specific genre with id = 0 occurs 3 million times, while the second one for example just occurs not even 1 million times. 
 This would mean, that one specific genre is recommended the most. However, further investigations are done in the feature engineering chapter. 
+
+```{r}
+genre_listened <- Deezer %>%
+  filter(is_listened==1) %>%
+  group_by(genre_id) %>%
+  summarize(n=n()) %>%
+  arrange(-n)
+head(genre_listened)
+
+genre_nonlistened <- Deezer %>%
+  filter(is_listened==0) %>%
+  group_by(genre_id) %>%
+  summarize(n=n()) %>%
+  arrange(-n)
+head(genre_nonlistened)
+
+par(mfrow=c(1,2))
+ggplot(genre_listened, aes(genre_id)) + geom_histogram() 
+ggplot(genre_nonlistened, aes(genre_id)) + geom_histogram() 
+```
+
+=======
+Likewise, `r length(unique(Deezer$genre_id))` different genres exist in the dataset. The histogram shows clearly that one specific genre with id = 0 occurs 3 million times while the second one for example just occurs not even 1 million times. 
+This would mean that one specific genre is recommended most of the time. However, further investigations are done in the feature engineering chapter. 
+>>>>>>> ff0b6a85794dbbca601ff88e7a73e50b38c2f70a
 
 ```{r}
 sum(is.na(Deezer$genre_id))
@@ -242,9 +276,13 @@ sum(is.na(Deezer$is_listened))
 
 At the first glimpse, the dataset looks like tall data. However, most of the features are factors. As already mentioned in the previous chapter, the data contains `r length(unique(Deezer$user_id))` different users, `r length(unique(Deezer$genre_id))` genres, `r length(unique(Deezer$artist_id))` artists, `r length(unique(Deezer$album_id))` albums and `r length(unique(Deezer$media_id))` unique songs. 
 
+<<<<<<< HEAD
+In this part, we will talk about our Feature Engineering. We will start with easier transformatings and calculations going into advanced thinking processes throughout this chapter. We tried to demonstrate everything we have archived and how we got chronologically to the point of most success.
+=======
 Therefore, the main challenge of that project was how to create a prediction model with this amount of factors. Furthermore, insufficient data of the column genre_id and a to grained timestamp and release date were the features which needed some improvements. 
+>>>>>>> ff0b6a85794dbbca601ff88e7a73e50b38c2f70a
 
-Furthermore, the following correlation plot visualizes the collinearity between the variables. (? here we can write more about important features...)
+Furthermore, the following correlation plot visualizes the collinearity between the variables. 
 ```{r}
 corDeezer <- cor(Deezer)
 #png("correlationMatrix.png")
@@ -260,7 +298,10 @@ In this part, we will talk about our Feature Engineering. We will start with eas
 
 Converting the Timestamp is the most basic feature engineering we have done. We extract Hour of Day as well as weekday from the timestamp. This procedure is so easy, that we did it on the fly, as you will see at the end of the feature engineering section. Nethertheless, here is what will happen.
 
+<<<<<<< HEAD
 The idea behind that is the assumption, that the Hour of a Day or/and the Day of Week contributes patterns to the prediction, e.g. if user goes regularly to the gym in the on tuesday and thursday at 8pm. This pattern cannot be found with a second precision. 
+=======
+>>>>>>> ff0b6a85794dbbca601ff88e7a73e50b38c2f70a
 
 ```{r}
 transforming_timestamp <- function(x){
@@ -337,7 +378,7 @@ theme_light()
 ggsave("wd_distribution_test.png",plot=gg12, width = 8, height=5, units="in")
 ```
 
-#### 3 (b) Beats per Minute
+#### 2(b) Beats per Minute
 
 Beats per Minute (bpm) is an easy, numeric feature which we could query from the API. We thought it may help us differentiate inside of genres for example "softrock" being tendentially slower (lower bpm) than its assosiated genre "rock". It wasn´t our intention to create subgenres in any way, but just giving this extra information into the model.
 
@@ -352,11 +393,11 @@ uniquetracks$api <- paste("https://api.deezer.com/track/",uniquetracks[,1], sep=
 uniquetracks$bpm <- 0
 
 for (i in 1:length(uniquetracks[,1])) { ## for all tracks
-	this.raw.result <- GET(url = as.character(uniquetracks[i,2])) ## get the infos
-	this.result <- fromJSON(rawToChar(this.raw.result$content)) ## turn it into a readable format
-	uniquetracks$bpm[i] <- ifelse(is.null(this.result$bpm),"NA",this.result$bpm) ## get the BPM
-	#message(as.character(i), appendLF = FALSE) ## print the iteration to see if the code is still working
-	Sys.sleep(time = 0.05) ## cap the speed so the 50 per 5 seconds are not violated
+  this.raw.result <- GET(url = as.character(uniquetracks[i,2])) ## get the infos
+  this.result <- fromJSON(rawToChar(this.raw.result$content)) ## turn it into a readable format
+  uniquetracks$bpm[i] <- ifelse(is.null(this.result$bpm),"NA",this.result$bpm) ## get the BPM
+#  message(as.character(i), appendLF = FALSE) ## print the iteration to see if the code is still working
+  Sys.sleep(time = 0.05) ## cap the speed so the 50 per 5 seconds are not violated
 }
 head(uniquetracks,10)
 #save(tracks, file = "tracks_BPM.rda")
@@ -375,7 +416,7 @@ hist(as.numeric(tracks$track_bpm))
 To fill the zeros, we will take the mean bpm from the album the media is on, or the genre it is from, if die album information is not available. Sadly, at this point we didn´t had informations about the genre, so in order to keep it chronologically correct and not confusing, we will go to the genre section now and will come back to this afterwards.
 
 
-#### 3 (c) Genre_id
+#### 2(c) Genre_id
 
 In a first approach we tried to get enhanced information about the genre_id, by quering the API for the genre_ids.
 As seen in the visualisation part, we were confronted with a vast amount of genre_id==0 and it would be nice to know which genre it is.
@@ -394,10 +435,10 @@ library(httr)
 library(jsonlite)
 
 for (i in 1:50){ #first 500 genres
-	this.raw.result <- GET(url = as.character(uniquegenres[i,1])) # get data
-	this.result <- fromJSON(rawToChar(this.raw.result$content)) # turn data from unix to char and from json into a variable
-	uniquegenres$name[i] <- ifelse(is.null(this.result$name),"NA",this.result$name) # fill NA where NULL
-	Sys.sleep(time = 0.1) # System Sleep time to not overload the APIs capacity of 50 requests every 5 seconds
+this.raw.result <- GET(url = as.character(uniquegenres[i,1])) # get data
+this.result <- fromJSON(rawToChar(this.raw.result$content)) # turn data from unix to char and from json into a variable
+uniquegenres$name[i] <- ifelse(is.null(this.result$name),"NA",this.result$name) # fill NA where NULL
+Sys.sleep(time = 0.1) # System Sleep time to not overload the APIs capacity of 50 requests every 5 seconds
 }
 head(uniquegenres[,c(2,3)],10)
 
@@ -421,12 +462,12 @@ albums$alb.genre.id <- ""
 In the next chunk we receive the genre information for the first 50 albums.
 ```{r}
 for (i in 1:50){ #for 50 albums. you can replace 50 by length(albums$albums) to loop over all
-	this.raw.result <- GET(url = as.character(albums[i,1])) #get the infos
-	this.result <- fromJSON(rawToChar(this.raw.result$content)) #turn it into a readable format
-	albums$alb.genre[i] <- ifelse(is.null(this.result$genres$data[2]),"NA",this.result$genres$data[2]) #getting the written genre
-	albums$alb.genre.id[i] <- ifelse(is.null(this.result$genre_id),"NA",this.result$genre_id) #getting the genre_id from the album
-	#message(as.character(i), appendLF = FALSE) #print the iteration to see if the code is still working
-	Sys.sleep(time = 0.05) #cap the speed so the 50 per 5 seconds are not violated
+this.raw.result <- GET(url = as.character(albums[i,1])) #get the infos
+this.result <- fromJSON(rawToChar(this.raw.result$content)) #turn it into a readable format
+albums$alb.genre[i] <- ifelse(is.null(this.result$genres$data[2]),"NA",this.result$genres$data[2]) #getting the written genre
+albums$alb.genre.id[i] <- ifelse(is.null(this.result$genre_id),"NA",this.result$genre_id) #getting the genre_id from the album
+#message(as.character(i), appendLF = FALSE) #print the iteration to see if the code is still working
+Sys.sleep(time = 0.05) #cap the speed so the 50 per 5 seconds are not violated
 }
 
 head(albums$alb.genre)
@@ -446,7 +487,7 @@ albums[,'alb.genre2'] <- gsub("\\)", "" , albums[,'alb.genre2']) #remove ")"
 albums[,'alb.genre2'] <- gsub("\"", "" , albums[,'alb.genre2']) #remove """
 albums[,'alb.genre2'] <- gsub(" ", "" , albums[,'alb.genre2']) #remove " "
 
-albums <- splitstackshape::cSplit(albums,splitCols = "alb.genre2",direction = "wide")
+albums <- splitstackshape::cSplit(albums,splitCols = "alb.genre2",direction = "long")
 head(albums$alb.genre2,10)
 ```
 
@@ -528,7 +569,7 @@ bpmclean3[is.na(bpmclean3$track_bpm),]
 bpmclean3[is.na(bpmclean3$track_bpm),4] <- 80
 ```
 
-Now we only had to clean everything and bind it back into a single bpm lookup table, which we will call tracks_cleaned.rda
+Now we only had to clean everything and bind it back into a single bpm lookup table which we will call tracks_cleaned.rda
 
 ```{r}
 bpm1 <- bpm.data %>% filter(track_bpm>0)
@@ -574,7 +615,7 @@ treemap(DeezerNew_train_0525 %>% group_by(alb.genre2_01) %>% summarise(n=log(n()
 dev.off()
 ```
 
-Note: this code will run for some minutes. You can skip the following two chunks without missing something important.
+Note that this code will run for some minutes, you can skip the following two chunks without missing something crucial.
 
 ```{r}
 test.loop <- tracks_clean %>% filter(is.na(alb.genre2_01)) %>% select(album_id,track_bpm)
@@ -582,16 +623,16 @@ results <- test.loop
 
 #loop and fit
 for (i in levels(tracks_clean$alb.genre2_01)){
-	tracks_clean$y <- as.factor(as.numeric(tracks_clean$alb.genre2_01==i))
-	train.loop <- tracks_clean %>% filter(!is.na(alb.genre2_01)) %>% select(track_bpm,y)
+tracks_clean$y <- as.factor(as.numeric(tracks_clean$alb.genre2_01==i))
+train.loop <- tracks_clean %>% filter(!is.na(alb.genre2_01)) %>% select(track_bpm,y)
 
-	fit <- glm(y~track_bpm,data=train.loop, family=binomial(link = "logit"))
-	results[,i] <- predict(fit,test.loop, type="response")
+fit <- glm(y~track_bpm,data=train.loop, family=binomial(link = "logit"))
+results[,i] <- predict(fit,test.loop, type="response")
 }
 results <- results[,-2]
 ```
 
-At this point we have done a prediction for every missing album and can show, that all of them are considered to be "pop".
+At this point we
 
 ```{r}
 albums.finish <- melt(results,id.vars="album_id")
@@ -599,7 +640,6 @@ albums.finish <- albums.finish %>% group_by(album_id,variable) %>% summarise(val
 albums.finish <- albums.finish %>% group_by(album_id) %>% filter(value==max(value))
 table(albums.finish$variable)
 ```
-
 The tables shows that for all 20521 songs from out missing 999 albums, the looped glm model suggested, that all of the songs are so be considered "pop", which also followed the majority vote.
 
 ```{r warning=FALSE}
@@ -611,7 +651,7 @@ albums2 <- albums2[!duplicated(albums2$album_id),]
 ```
 
 
-#### 3 (d) User clusters by genre
+#### 2(d) User clusters by genre
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda") #we load a newer version of the data at this stage, but we only build on what has been worked out so far.
@@ -623,9 +663,9 @@ library(reshape2)
 
 One of our first thoughts about this project was: "the genre is the most important indicator if you like a song or not."
 At this point in time we already had trustworthy information about the genre, so we could feature engineer further.
-In a first attempt we generated a clustering based on genre-listening-history. Sadly we cannot deliver the original code, because the Zeno Server crashed after running the code and deleted the at this point unsaved rmd file. Luckily, we saved the output of the code in a rda.
+In a first attempt we generated a clustering based on genre-listening-history. Sadly we cannot deliver the original code, because the Zeno Server crushed after running the code and deleted the at this point unsaved rmd. Luckily, we saved the output of the code in a rda.
 
-Here is an attempt to recreate the code to give you an impression:
+Here is a attempt to recreate the code to give you an impression:
 
 ```{r}
 profs <- DeezerNew_train_0525 %>% 
@@ -638,7 +678,6 @@ profs <- profs[,-3] %>%
 profs[is.na(profs)] <- 0
 profs[1:10,c(1,3,13,17,29,41)]
 ```
-
 This chunk gave us the opportunity to look how genres are distributed for every user individual. e.g. User 1 listened 11% "Alternative", 12% "Dance", 24% Electro and so on.
 
 We used this information to create clusters of similar users, using hclust over kmeans, because we didnt know how many clusters we wanted to come up with and didn´t wanted to rerun the code multiple times.
@@ -649,7 +688,7 @@ The code looked somewhat like this, note that creating the distance-matrix will 
 d <- dist(profs[,-1])
 ```
 
-We want to use this journey back into our beginnings to show how different clustering methods looked like. However, we used the method "complete" linkage (which means, that the maximum distance will be used to link two clusters) and set the cut-off threshold to 35 clusters.
+We want to use this journey back into out beginnings to show how different clustering methods looked like. Finally tho, we used the method "complete" and set the cutoff point to 35 clusters.
 
 ```{r}
 c.tree.comp = hclust(d,method="complete")
@@ -673,9 +712,9 @@ labs.comp = cutree(c.tree.comp,k=35)
 
 This new feature added to our previously best model increased our score by 4%.
 
-We didn´t stop at this point, since there are some aspects which are worrying. e.g. that we don't take into account the number of observations or how often a genre was played, in contrast, we only look at how often a user has listened to a genre. We kept on developing the idea, which is worth a chapter on its own.
+We didn´t stop at this point, since there are some aspects which are worrying. e.g. that we dont take into account the number of observations or how often a genre was played, in contrast, we only look at how often a user has listened to a genre. We kept on developing the idea, which is worth a chapter on its own.
 
-#### 3 (e) User Behavior Index
+#### 2(e) User Behavior Index
 
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
@@ -685,11 +724,11 @@ library(splitstackshape)
 library(reshape2)
 ```
 
-Sometimes a simple idea can lead to a cascade of thoughts and breakthroughs, as happened in our case.
-The thought was a simple one: "When we look at the distribution of genres for each unique user and cluster them, don´t we actually ignore the preferences of the individual user?" What for example happens to a user, who has multiple favorite genres? Imagine a user who listens only to 5 genres in a equally distributed fashion - each of those genres have a score of 0.2 in our previous approach. Now imagine another user who listens to two genres, one 80% and one 20%. At the moment we propose, that the genres with a score of .2 are equally important, even through it is clearly not the case: For user 1, every genre is his favorite, while for user 2 the second genre is not his favorite.
+Sometimes a simple idea can lead to a cascade of thoughts and breakthroughs, as happen in our case.
+The thought was a simple one: "When we look at the distribution of genres for each unique user and cluster them, don´t we actually ignore the preferences of the individual user?" What for example happens to a user, who has multiple favorite genres? Imagine a user who listens only to 5 genres in a equally distributed fashion - each of those genres have a score of 0.2 in our previous approach. Now imagine another user who listens to two genres, one 80% and one 20%. At the moment we propose, that the genres with a score of .2 are equally important, eventhrough it is clearly not the case: For user 1, every genre is his favorite, while for user 2 the second genre is not his favorite.
 
 How to bypass this problematic? By scaling our previous results user-individual. That means, we will take a users favorite genre (the max() of his scores), and set it to 1 and scale all other genres accordingly. With this transformation we are able to compare different users.
-Going back to the example from above: For user 1, each of his/her 5 genres is now a score of 1 while for user 2 only the first genre is 1 and the second is scaled respectively.
+Going back to the example from above: For user 1, each of his/her 5 genre is now a score of 1 while for user 2 only the first genre is 1 and the second is scaled respectively.
 
 
 ```{r}
@@ -739,7 +778,7 @@ ggsave("scaled_relative_genre.png",plot=gg2, width = 8, height=5, units="in")
 ```
 
 
-As told, a idea can lead to a cascade of ideas, here is our second thought: "What if the DeezerFlow-Algorithm suggested a genre very often, but it wasn´t listened to often, even through still often enough to let it appear as a favorite genre for this user?". To get a sense for this possibility, we created a new table, with the percentage of how often a genre is listened when played for every user.
+As told, a idea can lead to a cascade of ideas, here is our second thought: "What if the DeezerFlow-Algorithm suggested a genre very often, but it wasn´t listened to often, even through still often enough to let it appear as a favorite genre for this user?" To get a sense for this possibility, we created a new table, with the percentage of how often a genre is listened when played for every user.
 
 ```{r}
 profs <- DeezerNew_train_0525 %>% 
@@ -768,9 +807,9 @@ gg3 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), 
 ggsave("average_is_listened.png",plot=gg3, width = 8, height=5, units="in")
 ```
 
-Combining the scaled genre preferences as well as the listening history is exactly what we had in mind. As one of the value descreases, the overall trustworthyness of the data is going down. As long as both values are high or extremely low, we can be pretty sure, that a user has listened or not listened to the song respectively.
+Combining the scaled genre preferences as well as the listening history is exactly what we had in mind. As one of the value descreases, the overall trustworthyness of the data is going down. As long as both values are high oder extremely low, we can be pretty sure that a user has listened or not listened to the song respectively.
 
-One aspect we haven't considered yet, is the sample size. Until this point we cannot differentiate between a user, who has listened for example to only one song once (scaled value and listenening bahavior is 1) and someone who has heard to a genre hundreds of time.
+One aspect we havn´t considered yet, is samplesize. Until this point we cannot differentiate between a user who has listened for example to only one song once (scaled value and listenening bahavior is 1) and someone who has heard to a genre hundreds of time.
 
 To compensate this in some way, we extracted this information aswell:
 
@@ -799,8 +838,7 @@ gg4 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), a
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
 ggsave("count.png",plot=gg4, width = 8, height=5, units="in")
 ```
-
-Test, if columns and user_ids are arranged identically for each of the three tables.
+test if cols and user_ids are arranged identicalle for each of the three tables.
 
 ```{r}
 sum(names(listened) != names(scaled)) #should be 0
@@ -903,7 +941,7 @@ behavior[1:10,1:10]
 ```
 
 
-#### 3 (f) User Behavior_index for Clustering users
+#### 2(f) User Behavior_index for Clustering users
 
 Finally we can replace the previous clustering by clustering across the users Behavior_index.
 If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
@@ -962,7 +1000,7 @@ The profiles were saved in a lookuptable and joined onto the data.
 Overall, adding the behavior_index as well as behavior_profile increased our accuracy by a significant amount.
 We were lucky and could use the data for g, l and c as additional Features.
 
-#### 3 (g) Using the Behavior Architecture to Create Further Features
+#### 2(g) Using the Behavior Architecture to Create Further Features
 
 A day before the deadline, after the meeting with Prof. Löcher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very timeconsuming.
 For Example: The lookuptable for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
@@ -1062,34 +1100,35 @@ behavior_album_molten <- melt(behavior_album, id.vars="user_id",variable.name="a
 
 Sadly the computation wasn´t fast enough to enable us to get a final prediction with the new features. But we ran some hypertuned models after the competition and will present the results later on.
 
-#### 3 (h) Creating the new dataset
+#### 2(h) Creating the new dataset
 
-The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we execute the code just for the test dataset for illustrating that it works.
+*prepare a subset for merging!
 
-Loading required data and lookup tables:
 ```{r Loading new lookup tables}
-Deezer <- read.csv("/home/Deezer/10_Basic_Dataset/train.csv")
-Deezer_test <- read.csv("/home/Deezer/10_Basic_Dataset/test.csv")
+#Deezer <- read.csv("/home/Deezer/10_Basic_Dataset/train.csv")
+#Deezer_test <- read.csv("/home/Deezer/10_Basic_Dataset/test.csv")
 
-load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda") #BPM column
-load("/home/Deezer/30_Wrangled_Data/album_genre_clean.rda") #new_genre
-load("/home/Deezer/30_Wrangled_Data/21_05_new_behavior_lookup.rda")
-load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
+#load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda") #BPM column
+#load("/home/Deezer/30_Wrangled_Data/album_genre_clean.rda") #new_genre
+#load("/home/Deezer/30_Wrangled_Data/21_05_new_behavior_lookup.rda")
+#load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
 
-load("/home/Deezer/30_05_genre_counts_lookup.rda")
-load("/home/Deezer/30_05_genre_listened_lookup.rda")
-load("/home/Deezer/30_05_genre_scaled_lookup.rda")
+#load("/home/Deezer/30_05_genre_counts_lookup.rda")
+#load("/home/Deezer/30_05_genre_listened_lookup.rda")
+#load("/home/Deezer/30_05_genre_scaled_lookup.rda")
 
 #load("/home/Deezer/30_05_artist_listened_lookup.rda")
-#load("/home/Deezer/30_05_artist_scaled_lookup.rda") # woow they take long
+#load("/home/Deezer/30_05_artist_scaled_lookup.rda")
 #load("/home/Deezer/30_05_artist_counts_lookup.rda")
+
+#behavior_molten$user_id <- as.integer(as.character(behavior_molten$user_id))
+#cluster_user_lookup$user_id <- as.integer(as.character(cluster_user_lookup$user_id))
 ```
 
-The lookup tables already provide the user_ids as factors. However, the datatypes of the competition set has not been modified yet. This means all features are still numeric veriables. We decided to merge the data by the remaining numeric value instead of the factor as the merge itself can be executed quite faster. Therefore, we change the user_id of the lookup tables into numeric values at first. 
-
+problems which occured while merging data
 ```{r}
 behavior_molten$user_id <- as.integer(as.character(behavior_molten$user_id))
-#class(behavior_molten$user_id)
+class(behavior_molten$user_id)
 
 cluster_user_lookup$user_id <- as.integer(as.character(cluster_user_lookup$user_id))
 
@@ -1109,12 +1148,13 @@ artist_scaled.molten$artist_id <- as.integer(as.character(artist_scaled.molten$a
 
 #Due to the fact that we had problems while removing sample_id, i created a NA column for train data as well. 
 Deezer_test$is_listened = 0
+#Deezer_test$sample_id = NULL
 Deezer$sample_id = NA
 ```
 
-We created a merging-function, which does all joins for a preferred dataset. For the demonstration, we just merge the 1000 rows of the Deezer train dataset.
+
 ```{r}
-#dim(Deezer) #great for checking that number of rows stay constant while merging
+dim(Deezer)
 dim(Deezer_test)
 
 #joining data:
@@ -1138,9 +1178,9 @@ get_new_data <- function(x) {
   x <- merge(x, genre_listened.molten , x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
   x <- merge(x, genre_scaled.molten, x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
   x <- merge(x, genre_counts.molten, x.by = c("user_id","alb.genre_2_01"),all.x=T,sort=F)
- # x <- merge(x, artist_counts.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
-  #x <- merge(x, artist_scaled.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
- # x <- merge(x, artist_listened.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+  x <- merge(x, artist_counts.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+  x <- merge(x, artist_scaled.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
+  x <- merge(x, artist_listened.molten, x.by = c("user_id","artist_id"),all.x=T,sort=F)
   
   #remove old columns / other columns are deleted below:
   x$genre_id = NULL #delete old genre column
@@ -1150,18 +1190,16 @@ get_new_data <- function(x) {
   return(x)
 }
 
-#DeezerNew_train_0702 <- get_new_data(Deezer)
-DeezerNew_test_0702 <- get_new_data(Deezer_test)
+DeezerNew_train_0621 <- get_new_data(Deezer)
+DeezerNew_test_0621 <- get_new_data(Deezer_test)
 
-#dim(DeezerNew_train_0702)
-dim(DeezerNew_test_0702)
+dim(DeezerNew_train_0621)
+dim(DeezerNew_test_0621)
 
-DeezerNew_test_0702 <- DeezerNew_test_0702 %>%
- arrange(sample_id)
-```
+DeezerNew_test_0621 <- DeezerNew_test_0621 %>%
+  arrange(sample_id)
 
-It can be seen that the function added 10 new features, while the number of rows stay fixed. However, before we can use the data we have to modify the datatypes. That is done by the next function: data_type_function.
-```{r}
+
 #converting specific columns in factors
 data_type_function <- function(x){
     cols <- c("media_id", "album_id", "context_type", "platform_name", "platform_family", "listen_type", "user_gender", "user_id", "artist_id", "is_listened", "alb.genre2_01", "wd", "profile_id")
@@ -1169,66 +1207,81 @@ data_type_function <- function(x){
     return(x)
 }
 
-#DeezerNew_train_0702 <- data_type_function(DeezerNew_train_0702)
-DeezerNew_test_0702 <- data_type_function(DeezerNew_test_0702)
-```
+DeezerNew_train_0621 <- data_type_function(DeezerNew_train_0621)
+DeezerNew_test_0621 <- data_type_function(DeezerNew_test_0621)
+#################################
+## Unfortunately, we get ~1500 NAs in the DeezerNew_train_0522 dataset and 3 in the test dataset. Therefore, we decided to convert the NAs to 0.
+DeezerNew_train_0530$behavior[is.na(DeezerNew_train_0530$behavior)] <- 0
+DeezerNew_test_0530$behavior[is.na(DeezerNew_test_0530$behavior)] <- 0
 
-Furthermore we did some additional adjustments. This was caused by merging the new behavior feature. For the test data we gain 4 NAs which might not be problematic as they are so less. However, in the train data set this effect occurs 1500 times. 
-
-```{r}
-sum(is.na(DeezerNew_test_0702$behavior))
-```
-
-Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters ü and ö letters have caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
-
-```{r}
-Deezer_fail <- DeezerNew_test_0702 %>%
-  filter(is.na(DeezerNew_test_0702$behavior))
-
-Deezer_fail %>%
-  group_by(alb.genre2_01) %>%
-  summarise (n = n())
-```
-
-These genres are not that important for the modeling part. Also, they occur just 1500 times out of 7.5 million rows. Therefore, we decided to fill the NAs with a listening behavior of 0. 
-
-```{r}
-#DeezerNew_train_0702$behavior[is.na(DeezerNew_train_0702$behavior)] <- 0
-DeezerNew_test_0702$behavior[is.na(DeezerNew_test_0702$behavior)] <- 0
-```
-
-In the end of our project we also add new time information to our models. These features are also added to the models. 
-```{r}
 ## Add time as circular value
-#DeezerNew_train_0702$xhh <- sin(2 * pi * DeezerNew_train_0702$hh / 24)
-#DeezerNew_train_0702$yhh <- cos(2 * pi * DeezerNew_train_0702$hh / 24)
-DeezerNew_test_0702$xhh <- sin(2 * pi * DeezerNew_test_0702$hh / 24)
-DeezerNew_test_0702$yhh <- cos(2 * pi * DeezerNew_test_0702$hh / 24)
+DeezerNew_train_0530$xhh <- sin(2 * pi * DeezerNew_train_0530$hh / 24)
+DeezerNew_train_0530$yhh <- cos(2 * pi * DeezerNew_train_0530$hh / 24)
+DeezerNew_test_0530$xhh <- sin(2 * pi * DeezerNew_test_0530$hh / 24)
+DeezerNew_test_0530$yhh <- cos(2 * pi * DeezerNew_test_0530$hh / 24)
 
 ## Delete the hh column
-#DeezerNew_train_0702 <- subset(DeezerNew_train_0702, select = -hh)
-DeezerNew_test_0702 <- subset(DeezerNew_test_0702, select = -hh)
-```
+DeezerNew_train_0530 <- subset(DeezerNew_train_0530, select = -hh)
+DeezerNew_test_0530 <- subset(DeezerNew_test_0530, select = -hh)
 
-In the end both files are combined. This was needed for hot endcoding and creating the belonging sparse matrix. Afterwards, all three new datasets are saved. 
-```{r}
 ## Combine the files
-#DeezerNew_traintest_0702 <- rbind(DeezerNew_train_0621,DeezerNew_test_0702)
+DeezerNew_traintest_0621 <- rbind(DeezerNew_train_0621,DeezerNew_test_0621)
+
+
 
 ## Save the new files
-#save(DeezerNew_train_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_train_0702.rda")
-#save(DeezerNew_test_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_test_0702.rda")
-#save(DeezerNew_traintest_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_traintest_0702.rda")  
+save(DeezerNew_train_0621, file = "~/30_Wrangled_Data/Deezer_train_0621.rda")
+save(DeezerNew_test_0621, file = "~/30_Wrangled_Data/Deezer_test_0621.rda")
+save(DeezerNew_traintest_0621, file = "~/30_Wrangled_Data/Deezer_traintest_0621.rda")  
+
+################
+remove_columns <- function(x) {
+  x$user_id = NULL 
+  x$media_id = NULL 
+  x$artist_id = NULL 
+  #x$album_id = NULL 
+  return(x)
+}
+
 ```
 
-Load new datatables for the modeling part:
+
+#Checking Nas and Data order:
 ```{r}
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_train_0530.rda")
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_test_0530.rda")
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_traintest_0530")
+tail(DeezerNew_traintest_0530)
 ```
 
-##4. Modeling
+Check NAs for behavior column:
+-> The problem is the spelling of ü and ö letters. In the lookup table they are written like: "T<fc>rkischeVolksmusik". So the match is not possible at the moment... 
+
+Hörspiele
+DeutscheHörspiele
+TürkischeVolksmusik
+-> As they are not the most important genres, i think we can fill the NAs with 0. Chris' quick and dirty solution)
+
+```{r}
+sum(is.na(DeezerNew_traintest_0530$behavior))
+
+#DeezerNew_test_0523 %>%
+  #filter (is.na(DeezerNew_test_0523$behavior))
+
+#Deezer_fail <- DeezerNew_train_0523 %>%
+#  filter (is.na(DeezerNew_train_0523$behavior))
+
+#Deezer_fail %>%
+ # group_by(alb.genre2_01) %>%
+ # summarise (n = n())
+
+#found NAs: ö, ü,... are causing the problems !!!
+
+hist(DeezerNew_traintest_0530$behavior)
+```
+
+
+
+
+
+##3. Modeling
 
 Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models).
 
@@ -1238,7 +1291,7 @@ As gradient boosted trees are extremely powerful and win many kaggle competition
 
 Furthermore, we also tried a Naive Bayes and Deep Learning approach. Other libraries to build these models include h2o, lightgbm and naivebayes. In the end though, our best model submitted was based on xgboost. Let us take you through the model building process in the following chapter.
 
-#### 4(a) xgboost
+#### 3(a) xgboost
 
 Before xgboost can be used, we needed to set up the data one more time. That is because xgboost cannot handle factors. Our dataset included many factors though. There are two ways dealing with this issue. 
 
@@ -1282,45 +1335,46 @@ best_logloss_index <- 0
 best_CVround <- 0
 
 for (iter in 1:1000) {
-	param <- list(objective = "binary:logistic",
-		 eval_metric = "logloss",
-		 max_depth = sample(5:10, 1),
-		 eta = runif(1, .01, .3),
-		 gamma = runif(1, 0.0, 0.2),
-		 subsample = runif(1, .6, .9),
-		 colsample_bytree = runif(1, .5, .8),
-		 min_child_weight = sample(1:40, 1),
-		 max_delta_step = sample(1:10, 1)
-		 )
-
-	cv_nround <- c(250, 500, 1000)
-	cv_nfold <- 5
-	seed_number = sample.int(10000, 1)[[1]]
-	set.seed(seed_number)
+   param <- list(objective = "binary:logistic",
+                 eval_metric = "logloss",
+                 max_depth = sample(5:10, 1),
+                 eta = runif(1, .01, .3),
+                 gamma = runif(1, 0.0, 0.2),
+                 subsample = runif(1, .6, .9),
+                 colsample_bytree = runif(1, .5, .8),
+                 min_child_weight = sample(1:40, 1),
+                 max_delta_step = sample(1:10, 1)
+                 )
    
-	for (validator in cv_nround) {
-		mdcv <- xgb.cv(data = sparse_train,
-			  label = output_vector,
-			  params = param,
-			  nfold = cv_nfold,
-			  nrounds = validator,
-			  nthread = 16,
-			  verbose = TRUE,
-			  early_stopping_rounds = 15,
-			  maximize = FALSE
-			  )
+   cv_nround <- c(250, 500, 1000)
+   cv_nfold <- 5
+   seed_number = sample.int(10000, 1)[[1]]
+   set.seed(seed_number)
+   
+   for (validator in cv_nround) {
+     mdcv <- xgb.cv(data = sparse_train,
+                  label = output_vector,
+                  params = param,
+                  nfold = cv_nfold,
+                  nrounds = validator,
+                  nthread = 16,
+                  verbose = TRUE,
+                  early_stopping_rounds = 15,
+                  maximize = FALSE
+                  )
 
-		min_logloss <- min(mdcv$evaluation_log$test_logloss_mean)
-		min_logloss_index <- which.min(mdcv$evaluation_log$test_logloss_mean)
+   min_logloss <- min(mdcv$evaluation_log$test_logloss_mean)
+   min_logloss_index <- which.min(mdcv$evaluation_log$test_logloss_mean)
 
-		if (min_logloss < best_logloss) {
-			best_logloss = min_logloss
-			best_logloss_index = min_logloss_index
-			best_seednumber = seed_number
-			best_param = param
-			best_CVround = mdcv$niter
-		}
-   	}
+   if (min_logloss < best_logloss) {
+       best_logloss = min_logloss
+       best_logloss_index = min_logloss_index
+       best_seednumber = seed_number
+       best_param = param
+       best_CVround = mdcv$niter
+       
+       }
+   }
 }
 
 ## Save the best parameters
@@ -1328,24 +1382,12 @@ best_parameters <- data.frame(best_param, best_CVround)
 write.csv(best_parameters, file = "best_parameters_FinalCV.csv")
 ```
 
-#### 4 (b) Other models
-  * [XGBoost Numeric/ label encoding method model](https://github.com/pranavpandya84/deezer_report/blob/master/Models/XGBoost_Numeric.rmd)
-  * [LightGBM](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LightGBM.rmd)
-  * [H2O Automated Machine Learning](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
-  * [H2O Distsributed Random Forest- Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DRF%2023rd%20May/screenshots.rmd)
-  * [H2O Deep Learning - Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/Screenshots.rmd) 
-  * [Models- folder](https://github.com/pranavpandya84/deezer_report/tree/master/Models) 
-  * [Data used for other models](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
-(Data has also been put in zeno server under "60_data_other_models" and steps from above scripts/ models can be replicated. Dropbox link is to download data and try models locally without need of server.)
+#### 3(b) ...
+#### 3(c) best model
 
-#### 4 (c) best model
+##Reflection
 
-* [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
-![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
-
-## 5. Reflection
-
-## 6. Team effot
+##Team effot
 
 
 
