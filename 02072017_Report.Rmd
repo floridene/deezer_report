@@ -20,7 +20,7 @@ Therefore, the report will give a short introduction to the dataset at first. Se
 The libraries were used for the project are the following: 
 ```{r Initialization, echo=FALSE, warning=FALSE, message=FALSE}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot, gridExtra)
+pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot, gridExtra,formattable)
 #library(ggplot2)
 #library(dplyr)
 #library(RColorBrewer)
@@ -316,7 +316,7 @@ transforming_timestamp(Deezer)[1:10,12:17]
 tmp <- transforming_timestamp(Deezer)
 myColors <- rep(brewer.pal(7,"Blues")[5:6],12)
 
-gg9 <- ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
+ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,600000),breaks=seq(0,600000,50000))+
   scale_x_continuous(breaks=seq(0,23,1))+
 labs(y="observations",
@@ -325,13 +325,13 @@ labs(y="observations",
       caption="Source: Deezer train data")+
 theme_light()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave("hh_distribution_train.png",plot=gg9, width = 8, height=5, units="in")
+#ggsave("hh_distribution_train.png",plot=gg9, width = 8, height=5, units="in")
 ```
 
 ```{r}
 myColors <- c(rep(brewer.pal(7,"Blues")[5:6],3),"#4292C6")
 
-gg10<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
+ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,1300000),breaks=seq(0,1300000,100000))+
   scale_x_continuous(breaks=seq(0,6,1))+
 labs(y="observations",
@@ -339,14 +339,13 @@ labs(y="observations",
       title="Distribution of Listening Weekday",
       caption="Source: Deezer train data")+
 theme_light()
-ggsave("wd_distribution_train.png",plot=gg10, width = 8, height=5, units="in")
+#ggsave("wd_distribution_train.png",plot=gg10, width = 8, height=5, units="in")
 ```
 
 ```{r}
 tmp <- transforming_timestamp(Deezer_test)
 myColors <- rep(brewer.pal(7,"Blues")[5:6],12)
 
-gg11 <- 
   ggplot(tmp, aes(x=hh))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,1800),breaks=seq(0,1800,100))+
   scale_x_continuous(breaks=seq(0,23,1))+
@@ -357,13 +356,13 @@ labs(y="observations",
       caption="Source: Deezer test data")+
 theme_light()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave("hh_distribution_test.png",plot=gg11, width = 8, height=5, units="in")
+#ggsave("hh_distribution_test.png",plot=gg11, width = 8, height=5, units="in")
 ```
 
 ```{r}
 myColors <- c(rep(brewer.pal(7,"Blues")[5:6],3),"#4292C6")
 
-gg12<-  ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
+ggplot(tmp, aes(x=wd))+stat_bin(binwidth=1,fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,5000),breaks=seq(0,5000,250))+
   scale_x_continuous(breaks=seq(0,6,1))+
 labs(y="observations",
@@ -372,7 +371,7 @@ labs(y="observations",
      subtitle="for test data",
       caption="Source: Deezer test data")+
 theme_light()
-ggsave("wd_distribution_test.png",plot=gg12, width = 8, height=5, units="in")
+#ggsave("wd_distribution_test.png",plot=gg12, width = 8, height=5, units="in")
 ```
 
 #### 3 (b) Beats per Minute
@@ -407,12 +406,23 @@ load("/home/Deezer/30_Wrangled_Data/Archiv/tracks_BPM.rda")
 tracks <- tracks[,c(2,3)]
 tracks$track_bpm[tracks$track_bpm=="NA"] <- "0"
 tracks$track_bpm <- as.numeric(tracks$track_bpm)
-hist(as.numeric(tracks$track_bpm))
+
+myColors <- rep(brewer.pal(7,"Blues")[5:6],20)
+
+ggplot(tracks, aes(x=track_bpm))+stat_bin(bins=40, fill=myColors, color="black")+
+  scale_y_continuous(limits=c(0,46000),breaks=seq(0,45000,5000))+
+  scale_x_continuous(breaks=seq(0,240,10))+
+labs(title="Distribution of Beats per Minute",
+     y="observations",
+      x="beats per minute",
+      caption="Source: Deezer train data")+
+theme_light()+
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
 ```
 
-To fill the zeros, we will take the mean bpm from the album the media is on, or the genre it is from, if die album information is not available. Sadly, at this point we didn´t had informations about the genre, so in order to keep it chronologically correct and not confusing, we will go to the genre section now and will come back to this afterwards.
+To fill the zeros, we will take the mean bpm from the album the media is on, or the genre it is from, if the album information is not available. Sadly, at this point we didn´t had informations about the genre, so in order to keep it chronologically correct and not confusing, we will go to the genre section now and will come back to this afterwards.
 
-#### 3 (c) Discarded: EchoNest, singer's gender, users age, user's language vs. song language, sentiment of title
+#### 3 (c) Discarded: EchoNest, singer's gender, users age, user's language vs. song language
 
 For increasing the available information we looked for additional sources, like API provider. And we found EchoNest and an R interface (https://github.com/mukul13/rechonest). EchoNest provides a lot of information about songs, albums, artists, etc. Unfortunately, EchoNest was bought by Deezers market competitor Spotify. Furthermore, we found a hint in the DSG forum, that we can use the Deezer API, but are not allowed to use other sources.
 
@@ -422,9 +432,6 @@ If one is thinking to the parents music taste, one could claim, that elder peopl
 
 User's language vs. song language
 ToDo: Pranav, what happend with that approach?
-
-Sentiment analysis of song titles
-ToDo: Max, you thought about that once...
 
 
 #### 3 (d) Genre_id
@@ -454,7 +461,7 @@ for (i in 1:50){ #first 500 genres
 head(uniquegenres[,c(2,3)],10)
 
 ```
-As we can see, the genre names are mainly NAs, and if one would look at row number 21, we would see, that genre_id==0 refers to "all". 
+As we can see, the genre names are mainly NAs, and if one would look at row number 21, we would see, that genre_id==0 refers to "all". `r uniquegenres[21,c(2,3)]`
 
 Now that we know, that we can and should not rely on the genre_id, we need to get the information about the genre from another source. Luckily, we have the album_id and the API provides genre information for each album individually, which is not related to the genre_id in first place.
 
@@ -481,7 +488,7 @@ for (i in 1:50){ #for 50 albums. you can replace 50 by length(albums$albums) to 
 	Sys.sleep(time = 0.05) #cap the speed so the 50 per 5 seconds are not violated
 }
 
-head(albums$alb.genre)
+formattable(head(albums,50))
 ```
 
 So far we created a new DF called "albums" which has 4 columns: API-query, album_id, genre and genre_id,
@@ -499,14 +506,14 @@ albums[,'alb.genre2'] <- gsub("\"", "" , albums[,'alb.genre2']) #remove """
 albums[,'alb.genre2'] <- gsub(" ", "" , albums[,'alb.genre2']) #remove " "
 
 albums <- splitstackshape::cSplit(albums,splitCols = "alb.genre2",direction = "wide")
-head(albums$alb.genre2,10)
+formattable(head(albums[,c(2,5,6,7)],10))
 ```
 
 At this stage we decided to only grab the very first of the listed genres for each albums, since it would make most sense, that the main genre is named first. We still have NULLs and NAs.
 
 Our first approach in tackeling the NULLs and NAs was to get the albums corresponding artist ids. Than, with the artist information, we were able to lookup the artist´s most played genre to fill in missing data. For Example if artist 1 had 4 albums in genre "rock", one could assume that a 5th album, which genre is missing is "rock" aswell.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 albums$artist <- all$artist_id[albums$album_id %in% all$album_id] #joining artist informations
 
 #save(albums,file="bums_art.rda")
@@ -516,7 +523,7 @@ albums$artist <- all$artist_id[albums$album_id %in% all$album_id] #joining artis
 At this point we need to load in data which has been saved during our running.
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/bums_art.rda")
-head(albums,10)
+formattable(head(albums,10))
 ```
 
 Only on with this data you can see what splitstackshape::cSplit really did. It cutted the genres from the list of list and got each of them into a new column. Therefore just using the very first of this new columns is what we want, since it is the first entry of the genres.
@@ -528,10 +535,10 @@ Na.albums <- as.data.frame(Na.albums[,c(1,20)])
 colnames(Na.albums) <- c("album_id","artist_id")
 albums2 <- albums[!albums$album_id %in% Na.albums$album_id,] #get clean data into a new DF
 ```
-As we can see, we have 20521 rows in Na.albums, which means that we have 20521 albums out of 151605 which doesnt have a genre after quering the API.
+As we can see, we have `r nrow(Na.albums)` rows in Na.albums, which means that we have 20521 albums out of 151605 which doesnt have a genre after quering the API.
 
 ```{r}
-all2 <- all %>% select(album_id,artist_id) #subset all
+all2 <- all[,c(4,13)] #subset all to contain only album_id and artist_id
 all2 <- left_join(all2,albums2[,c(1,4)],by="album_id") #joining our new genre
 
 #creating artists loopuptable
@@ -596,12 +603,12 @@ tracks_clean2 <- tracks_clean[,c(2,3)]
 #save(tracks_clean2,file="tracks_cleaned.rda")
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 load("/home/Deezer/30_Wrangled_Data/tracks_cleaned.rda")
 
 myColors <- rep(brewer.pal(7,"Blues")[5:6],10)
 
-gg8 <- ggplot(tracks_clean2, aes(x=track_bpm))+stat_bin(bins=20, fill=myColors, color="black")+
+ggplot(tracks_clean2, aes(x=track_bpm))+stat_bin(bins=20, fill=myColors, color="black")+
   scale_y_continuous(limits=c(0,80000),breaks=seq(0,80000,5000))+
   scale_x_continuous(breaks=seq(50,220,10),limits=c(50,220))+
 labs(title="Distribution of Beats per Minute",
@@ -610,7 +617,7 @@ labs(title="Distribution of Beats per Minute",
       caption="Source: Deezer train data")+
 theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("BPM_distribution.png",plot=gg8, width = 8, height=5, units="in")
+#ggsave("BPM_distribution.png",plot=gg8, width = 8, height=5, units="in")
 
 ```
 
@@ -618,17 +625,16 @@ ggsave("BPM_distribution.png",plot=gg8, width = 8, height=5, units="in")
 To fill the missing genre_ids for our 999 observations, we will conduct a glm model to predict the genre by the songs bpm, since we have already exhausted all other possibilities. According to a majority vote on how the genre_id is distributed on the known cases, we could assume, that the missing ones are "pop".
 
 ```{r, fig.width=8,fig.height=5}
-#load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
-#insert treemap of genre distribution
+load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
 library(treemap)
-png(filename="genre_treemap.png",width=16, height=9, units = "in",res=72)
+#png(filename="genre_treemap.png",width=16, height=9, units = "in",res=72)
 treemap(DeezerNew_train_0525 %>% group_by(alb.genre2_01) %>% summarise(n=log(n())), index="alb.genre2_01",vSize = "n",title = "Logarithmic Distribution of Genres", palette = "GnBu")
-dev.off()
+#dev.off()
 ```
 
-Note: this code will run for some minutes. You can skip the following two chunks without missing something important.
+Note: this code will run for some minutes (glm for 47 models). For the sake of creating our html report, we set the chunks `eval=FALSE` to prevent the chunk from running. You can skip the following two chunks without missing too much information.
 
-```{r}
+```{r eval=FALSE}
 test.loop <- tracks_clean %>% filter(is.na(alb.genre2_01)) %>% select(album_id,track_bpm)
 results <- test.loop
 
@@ -645,7 +651,7 @@ results <- results[,-2]
 
 At this point we have done a prediction for every missing album and can show, that all of them are considered to be "pop".
 
-```{r}
+```{r eval=FALSE}
 albums.finish <- melt(results,id.vars="album_id")
 albums.finish <- albums.finish %>% group_by(album_id,variable) %>% summarise(value=sum(value))
 albums.finish <- albums.finish %>% group_by(album_id) %>% filter(value==max(value))
@@ -766,20 +772,20 @@ scaled[is.na(scaled)] <-0 #for users who have never listened to anything
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- melt(profs)
-gg1 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
+ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
   geom_bar(stat="identity", position="dodge")+
   scale_y_continuous(breaks=seq(0,0.65,0.05))+
   scale_fill_brewer(palette="Set1")+
   labs(x="genre",y="relative frequency", title="Relative Genre Frequency",subtitle="for three selected users")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("relative_genre.png",plot=gg1, width = 8, height=5, units="in")
+#ggsave("relative_genre.png",plot=gg1, width = 8, height=5, units="in")
 
 ```
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- melt(scaled)
-gg2 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
   geom_bar(stat="identity", position="dodge")+
   scale_y_continuous(breaks=seq(0,1,0.05))+
   
@@ -787,7 +793,7 @@ gg2 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), a
   labs(x="genre",y="scaled relative frequency",title="Scaled Relative Genre Frequency",subtitle="for three selected users")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("scaled_relative_genre.png",plot=gg2, width = 8, height=5, units="in")
+#ggsave("scaled_relative_genre.png",plot=gg2, width = 8, height=5, units="in")
 ```
 
 
@@ -810,14 +816,14 @@ listened$user_id <- profs$user_id
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- melt(listened)
-gg3 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
+ggplot(tmp %>% filter(user_id==15980 | user_id==19378 | user_id==10971), aes(x=variable,y=value, fill=user_id))+
   geom_bar(stat="identity", position="dodge")+
   scale_y_continuous(breaks=seq(0,1,0.05),limits = c(0,1))+
   scale_fill_brewer(palette="Set1")+
   labs(x="genre",y="average is_listened",title="Average is_listened per Genre",subtitle="for three selected users")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("average_is_listened.png",plot=gg3, width = 8, height=5, units="in")
+#ggsave("average_is_listened.png",plot=gg3, width = 8, height=5, units="in")
 ```
 
 Combining the scaled genre preferences as well as the listening history is exactly what we had in mind. As one of the value descreases, the overall trustworthyness of the data is going down. As long as both values are high or extremely low, we can be pretty sure, that a user has listened or not listened to the song respectively.
@@ -843,13 +849,13 @@ counts$user_id <- profs$user_id
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- melt(counts)
-gg4 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
   geom_bar(stat="identity", position="dodge")+scale_y_continuous(breaks=seq(0,90,5),limits = c(0,90))+
   scale_fill_brewer(palette="Set1")+
   labs(x="genre",y="Count",title="Count per Genre",subtitle="for three selected users")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("count.png",plot=gg4, width = 8, height=5, units="in")
+#ggsave("count.png",plot=gg4, width = 8, height=5, units="in")
 ```
 
 Test, if columns and user_ids are arranged identically for each of the three tables.
@@ -927,33 +933,33 @@ behavior$user_id <- scaled$user_id
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- melt(behavior)
-gg5 <- ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
+ggplot(tmp %>% filter(user_id==15980 | user_id==19378| user_id==10971), aes(x=variable,y=value, fill=user_id))+
   geom_bar(stat="identity", position="dodge")+scale_y_continuous(breaks=seq(0,4,0.25),limits = c(0,4))+
   scale_fill_brewer(palette="Set1")+
   labs(x="genre",y="behavior index",title="Behavior Index",subtitle="for three selected users")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("behavior_index.png",plot=gg5, width = 8, height=5, units="in")
+#ggsave("behavior_index.png",plot=gg5, width = 8, height=5, units="in")
 ```
 
 ```{r fig.width=8,fig.height=5, message=FALSE}
 tmp <- cbind.data.frame(sqrt(seq(0,1,length.out = 100)),seq(0,1,length.out = 100))
 colnames(tmp) <- c("after","before")
-gg6 <- ggplot(tmp,aes(x=before,y=after))+geom_point()+
+ggplot(tmp,aes(x=before,y=after))+geom_point()+
   scale_y_continuous(breaks=seq(0,1,0.1),limits = c(0,1))+
   scale_x_continuous(breaks=seq(0,1,0.1),limits = c(0,1))+
   scale_fill_brewer(palette="Set1")+
   labs(x="x",y="sqrt(x)",title="Sqrt(x) versus x")+
   theme_light()+
   theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("sqrt.png",plot=gg6, width = 8, height=5, units="in")
+#ggsave("sqrt.png",plot=gg6, width = 8, height=5, units="in")
 ```
 
 As you can imagine, the Behavior-Matrix is sparsely filled, since unlistened genres are set to 0, because g will be 0, even if c is not.
 Higher values of Behavior_index for a genre is indicating a higher likelihood of getting heard again by the user, while values close to 0 are indicating a low likelihood, respectively. We used the data for clustering as well as a feature itself. To use it as a feature we melt() the matrix and saved it as a lookup table, which we will later left join to the data using user_id and genre_id as a key.
 
 ```{r}
-behavior[1:10,1:10]
+formattable(behavior[1:10,1:10])
 ```
 
 
@@ -976,16 +982,16 @@ s.tree.comp = hclust(d,method="single")
 ```
 
 ```{r fig.width=8}
-png(filename="clustering_types.png",width=16, height=9, units = "in",res=72)
+#png(filename="clustering_types.png",width=16, height=9, units = "in",res=72)
 par(mfrow=c(1,3)) 
 plot(c.tree.comp)
 plot(w.tree.comp)
 plot(s.tree.comp)
-dev.off()
+#dev.off()
 
-png(filename="clustering_complete.png",width=16, height=9, units = "in",res=72)
+#png(filename="clustering_complete.png",width=16, height=9, units = "in",res=72)
 plot(c.tree.comp)
-dev.off()
+#dev.off()
 ```
 
 ```{r}
@@ -1002,14 +1008,14 @@ colnames(cluster_user_lookup) <- c("user_id","profile_id")
 load("/home/Deezer/30_Wrangled_Data/23_05_SQRT_35_Clusters.rda")
 myColors <- c(rep(brewer.pal(7,"Blues")[5:6],17),"#4292C6")
 
-gg13 <- ggplot(cluster_user_lookup, aes(x=profile_id))+stat_bin(binwidth=1,fill=myColors, color="black")+scale_y_log10()+
+ggplot(cluster_user_lookup, aes(x=profile_id))+stat_bin(binwidth=1,fill=myColors, color="black")+scale_y_log10()+
   scale_x_continuous(breaks=seq(1,35,1))+
 labs(y="log10 of observations",
       x="profile cluster",
       title="Logarithmic Distribution of Profile Belonging",
       caption="Source: Feature Engineering Behavior_index Clustering")+
 theme_light()+theme(axis.text.x = element_text(angle = 75, hjust = 1))
-ggsave("distribution_profiles.png",plot=gg13, width = 8, height=5, units="in")
+#ggsave("distribution_profiles.png",plot=gg13, width = 8, height=5, units="in")
 ```
 
 The profiles were saved in a lookuptable and joined onto the data.
@@ -1115,6 +1121,12 @@ behavior_album_molten <- melt(behavior_album, id.vars="user_id",variable.name="a
 ```
 
 Sadly the computation wasn´t fast enough to enable us to get a final prediction with the new features. But we ran some hypertuned models after the competition and will present the results later on.
+
+```{r}
+#knitr::knit_exit()
+rm(list = ls())
+```
+
 
 #### 3 (i) Creating the new dataset
 
