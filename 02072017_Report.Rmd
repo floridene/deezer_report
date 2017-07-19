@@ -19,8 +19,8 @@ Therefore, the report will give a short introduction to the dataset at first. Se
 
 The libraries were used for the project are the following: 
 ```{r Initialization, echo=FALSE, warning=FALSE, message=FALSE}
-#if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot, gridExtra)
 #library(ggplot2)
 #library(dplyr)
 #library(RColorBrewer)
@@ -42,6 +42,7 @@ tmp$is_listened <- 0
 all <- rbind(Deezer,tmp)
 rm(tmp)
 ```
+
 The train data contains `r round(dim(Deezer)[1]/1000000,2)` million rows and `r dim(Deezer)[2]` features, while the test set just contains `r round(dim(Deezer_test)[1]/1000,2)` thousand rows.
 
 The dataset provides the following columns, which we grouped in user specific, song specific and device specific features. These features are analyzed as well detections of NAs are conducted. As all features are characterized as numeric, we convert them into the right data type later on. 
@@ -82,9 +83,7 @@ user_distribution <- Deezer %>%
   arrange (-n)
 myColors <- rep(brewer.pal(7,"Blues")[5:6],50)
 
-sum(is.na(user_distribution$user_id))
-
-(gg6 <-ggplot(user_distribution, aes(x=n))+
+ggplot(user_distribution, aes(x=n))+
   geom_histogram(bins=100, fill=myColors,color="black")+
   scale_x_continuous(breaks=seq(0,2000,50),limits=c(0,2000))+
 labs(subtitle="in the train set",
@@ -93,41 +92,42 @@ labs(subtitle="in the train set",
       title="Distribution of Observations per User",
       caption="Source: Deezer train data")+
 theme_light()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 #ggsave("observations_distribution.png",plot=gg6, width = 8, height=5, units="in")
 ```
   
 The data reflects the listening behavior of male and female users. However, in this project we do not know how the values of 0 and 1 belong the specific genders. The plot below illustrates the amount of users per gender. 
 
 ```{r}
-plot(as.factor(Deezer$user_gender))
+myColors <- brewer.pal(7,"Blues")[5:6]
+ggplot(Deezer,aes(x=user_gender))+geom_bar(fill=myColors,color="black")+
+labs(subtitle="in the train set",
+      y="number of users",
+      x="Gender",
+      title="Distribution of Users Gender",
+      caption="Source: Deezer train data")+
+theme_light()
 ```
 
-The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)`. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of the users are 24 years old or younger. The feature age does not contain any NAs in the Deezer dataset.
+The user's age is in the range of `r min(Deezer$user_age)` and `r max(Deezer$user_age)` with a median on `r round(median(Deezer$user_age))`. The following boxplot illustrates the distribution of the unique users by their age. Accordingly, 50% of the users are 24 years old or younger. The feature age does not contain any NAs in the Deezer dataset.
 
 ```{r}
-round(median(Deezer$user_age))
+sum(is.na(Deezer$user_age))
 age <- Deezer %>%
   group_by(user_id) %>% summarise(age=max(user_age))
 boxplot(age$age)
-
-sum(is.na(Deezer$user_age))
 ```
 
-not needed anymore: (->max??)
 ```{r}
-age <- Deezer %>%
-  group_by(user_id) %>% summarise(age=max(user_age))
-
 myColors <- c(rep(brewer.pal(7,"Blues")[5:6],6),"#4292C6")
-(gg7 <- ggplot(age, aes(x=age))+stat_bin(binwidth=1, fill=myColors, color="black") +  scale_y_continuous(limits=c(0,2200),breaks=seq(0,2200,100))+
+ggplot(age, aes(x=age))+stat_bin(binwidth=1, fill=myColors, color="black") +  scale_y_continuous(limits=c(0,2200),breaks=seq(0,2200,100))+
     stat_bin(binwidth=1, geom="text", aes(label=..count..), vjust=-1.5)+ scale_x_continuous(breaks=seq(18,30,1))+
 labs(y="number of users",
       x="age",
       title="Distribution of Age among Users",
       caption="Source: Deezer train data")+
-theme_light()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+theme_light()
+
 #ggsave("Age_distribution.png",plot=gg7, width = 8, height=5, units="in")
 ```
 
@@ -152,7 +152,7 @@ sum(is.na(Deezer$artist_id))
 ```
 
 According to the extra information from the json file, we know that media_id and album_id are strongly correlated with each other. The correlation coefficient in that case is: `r cor(Deezer$media_id,Deezer$album_id)`.
-The following histogram underlines this correlation. Furthermore, some media_ids (and therefore some albums and artists) are recommended quite often over all users. (??maybe not necessarily important to show these plots...)
+The following histogram underlines this correlation. Furthermore, some media_ids (and therefore some albums and artists) are recommended quite often over all users.
 
 ```{r}
 par(mfrow=c(1,3))
@@ -173,17 +173,38 @@ number_genre <- Deezer %>%
   arrange(-n)
 head(number_genre)
 
-ggplot(number_genre, aes(genre_id)) + geom_histogram() # ggplot is fucked for my account-.. i dont know what happened
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],25))
+
+ggplot(number_genre, aes(genre_id)) + 
+  geom_histogram(bins=50,fill=myColors, color="black")+ 
+  scale_y_continuous(limits=c(0,750),breaks=seq(0,750,100))+
+labs(y="number of observations",
+      x="genre_id",
+      title="Distribution of Genre_id",
+      caption="Source: Deezer train data")+
+theme_light()
 ```
 
   
 
-(?) media_duration - duration of the song
-  
-  
+media_duration - duration of the song
+We were also provided with some information about the media duration. But a quick look at the summary will reveal a couple of outliers.
+
 ```{r}
-sum(is.na(Deezer$media_duration))
-hist(Deezer$media_duration)
+summary(Deezer$media_duration)
+```
+For this visualisation part, we filtered out <<q5 and >>q95 and kept all the values between `r quantile(Deezer$media_duration,0.05)` and `r quantile(Deezer$media_duration,0.95)`.
+```{r}
+myColors <- c(rep(brewer.pal(7,"Blues")[5:6],15))
+
+ggplot(Deezer%>%filter(media_duration>=quantile(media_duration,0.05) & media_duration<=quantile(media_duration,0.95)), aes(media_duration)) + 
+  geom_histogram(bins=30,fill=myColors, color="black")+
+labs(y="number of observations",
+      x="media duration in seconds",
+      title="Distribution of Mediaduration",
+     subtitle="for 90% of the data",
+      caption="Source: Deezer train data")+
+theme_light()
 ```
 
 
@@ -227,16 +248,33 @@ sum(is.na(Deezer$ts_listen))
 As the training data covers the overall listening behavior of an user, the song history includes songs which were listened in the flow and songs which were not recommended (listened by search or saved song lists). Thereby, `r round(table(Deezer$listen_type)[1]/1000000,2)` million rows do not presents recommended songs, while `r round(table(Deezer$listen_type)[2]/1000000,2)` were predicted by the recommendation engine Flow. The test data contains just predicted songs by Flow. 
 
 ```{r}
-plot(as.factor(Deezer$listen_type))
-table(Deezer_test$listen_type) # 1 wrong entry?? hä
+myColors <- brewer.pal(7,"Blues")[5:6]
+ggplot(Deezer,aes(x=listen_type))+geom_bar(fill=myColors,color="black")+
+labs(subtitle="in the train set",
+      y="number of observations",
+      x="listening type",
+      title="Distribution of Listening Type",
+      caption="Source: Deezer train data")+
+theme_light()
+```
+```{r}
+table(Deezer_test$listen_type)
 sum(is.na(Deezer$listen_type))
 ```
+Interestingly, we detected one single song inside the test set, which is of listening_type==0.
 
 At last, the most important column "is_listened" presents the response variable in the modeling part. 
 ```{r}
-plot(as.factor(Deezer$is_listened))
-sum(is.na(Deezer$is_listened))
+myColors <- rep(brewer.pal(7,"Blues")[5:6],2)
+ggplot(Deezer,aes(x=is_listened))+geom_bar(fill=myColors,color="black")+
+labs(subtitle="in the train set",
+      y="number of observations",
+      x="listening type",
+      title="Distribution of Is Listened versus Listening Type",
+      caption="Source: Deezer train data")+
+theme_light()+facet_wrap(~listen_type)
 ```
+Here we can see that songs which weren´t suggested (e.g. searched for or listened to in a playlist) have an higher chance of getting listened `r mean(Deezer$is_listened[Deezer$listen_type==0])` versus songs which have been suggested by the flow `r mean(Deezer$is_listened[Deezer$listen_type==1])`.
 
 #### 2(e) Summary of main challenges
 
