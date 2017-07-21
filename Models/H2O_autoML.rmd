@@ -35,9 +35,12 @@ test = train_test[7558835:7578752, ]
 y <- "is_listened"
 x <- setdiff(names(train), y)
 
-#start time 1650
-aml <- h2o.automl(x, y, training_frame = train, leaderboard_frame = test, max_runtime_secs = 3600, stopping_metric = "AUC")
+# reduced run time (for test purpose)
+aml <- h2o.automl(x, y, training_frame = train, leaderboard_frame = test, max_runtime_secs = 30, stopping_metric = "AUC")
 
+#start time 1650
+# Original
+#aml <- h2o.automl(x, y, training_frame = train, leaderboard_frame = test, max_runtime_secs = 3600, stopping_metric = "AUC")
 #end time 1820 (90 mins)
 
 # View the AutoML Leaderboard
