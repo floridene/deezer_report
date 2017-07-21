@@ -35,7 +35,7 @@ params.lgb = list(objective = "binary",
                   bagging_fraction = 1, 
                   bagging_freq = 0)
 
-# Get the time to train the lightGBM model
+# train the lightGBM model (reduced rounds for test purpose)
 lgb.bench = microbenchmark(
                     	lgb.model <- lgb.train(params = params.lgb, 
                     	                       data = lgb.train, 
@@ -43,10 +43,23 @@ lgb.bench = microbenchmark(
                     	                       learning_rate = 0.01, 
                     	                       num_leaves = 7, 
                     	                       num_threads = 4, 
-                    	                       nrounds = 500, 
-                    	                       early_stopping_rounds = 40, 
+                    	                       nrounds = 20, 
+                    	                       early_stopping_rounds = 4, 
                     	                       eval_freq = 10), 
                     	times = 5L)
+                      
+# train the lightGBM model (original)
+#lgb.bench = microbenchmark(
+#                    	lgb.model <- lgb.train(params = params.lgb, 
+#                    	                       data = lgb.train, 
+#                    	                       valids = list(validation = lgb.validation), 
+#                    	                       learning_rate = 0.01, 
+#                    	                       num_leaves = 7, 
+#                    	                       num_threads = 4, 
+#                    	                       nrounds = 500, 
+#                    	                       early_stopping_rounds = 40, 
+#                    	                       eval_freq = 10), 
+#                    	times = 5L)
 
 print(lgb.bench)
 print(max(unlist(lgb.model$record_evals[["validation"]][["auc"]][["eval"]])))
