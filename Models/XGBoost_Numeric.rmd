@@ -2,6 +2,7 @@
 ##### Score: 0.63073 (Public)	0.63217 (Private) | AUC 0.81 on validation set
 
 #### Use Zeno server (Deezer account) to replicate steps
+#### Scroll down to "Prepare XGBoost numeric model" step to run the model with prepared data
 
 #### Pre-processing step
 ```{r}
@@ -259,8 +260,7 @@ xgb.data.train <- xgb.DMatrix(as.matrix(train[, colnames(train) != "is_listened"
 xgb.data.valid <- xgb.DMatrix(as.matrix(valid[, colnames(valid) != "is_listened"]), label = valid$is_listened)
 xgb.data.test <- xgb.DMatrix(as.matrix(test[, colnames(test) != "is_listened"]), label = test$is_listened)
 
-
-# Train xgb model
+# Train xgb model (reduced rounds for test purpose)
 xgb.model.binLogit <- xgb.train(data = xgb.data.train,
                            params = list(objective = "binary:logistic", 
                                           eta = 0.1, 
@@ -271,9 +271,24 @@ xgb.model.binLogit <- xgb.train(data = xgb.data.train,
                                           nthread = 4, 
                                           eval_metric = "auc"), 
                             watchlist = list(valid = xgb.data.valid), 
-                            nrounds = 3000, 
-                            early_stopping_rounds = 100, 
-                            print_every_n = 10)
+                            nrounds = 10, 
+                            early_stopping_rounds = 3, 
+                            print_every_n = 1)
+                            
+# Train xgb model (Original)
+#xgb.model.binLogit <- xgb.train(data = xgb.data.train,
+#                           params = list(objective = "binary:logistic", 
+#                                          eta = 0.1, 
+#                                          max.depth = 12, 
+#                                          min_child_weight = 100, 
+#                                          subsample = 0.8, 
+#                                          colsample_bytree = 0.8, 
+#                                          nthread = 4, 
+#                                          eval_metric = "auc"), 
+#                            watchlist = list(valid = xgb.data.valid), 
+#                            nrounds = 3000, 
+#                            early_stopping_rounds = 100, 
+#                            print_every_n = 10)
 
 
 
