@@ -12,8 +12,8 @@ This was international student competition where more than 220 universities and 
 ## Main files:
 
 * [Final Report](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd) 
-* [Models- folder](https://github.com/pranavpandya84/deezer_report/tree/master/Models) (section 4a)
-  * [XGBoost Sparse model](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd)
+* [Models- folder](https://github.com/pranavpandya84/deezer_report/tree/master/Models) 
+  * [XGBoost Sparse model](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd)(section 4a)
   * [XGBoost Numeric model](https://github.com/pranavpandya84/deezer_report/blob/master/Models/XGBoost_Numeric.rmd)
   * [LightGBM](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LightGBM.rmd)
   * [H2O Automated Machine Learning](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
