@@ -1291,14 +1291,6 @@ In the end both files are combined. This was needed for hot endcoding and creati
 #save(DeezerNew_traintest_0702, file = "/home/Deezer/30_Wrangled_Data/Deezer_traintest_0702.rda")  
 ```
 
-Load new datatables for the modeling part:
-
-```{r}
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_train_0530.rda")
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_test_0530.rda")
-load("/home/Deezer/30_Wrangled_Data/DeezerNew_traintest_0530")
-```
-
 ##4. Modeling
 
 Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models.
@@ -1393,7 +1385,7 @@ DeezerNew_train_0525 <- subset(DeezerNew_train_0525, select = -sample_id)
 DeezerSampleCV <- DeezerNew_train_0525[sample(nrow(DeezerNew_train_0525), nrow(DeezerNew_train_0525) * .33), ]
 
 ## 4. Wrap the sample in a data.table for faster computation.
-Deezer_DT <- data.table(DeezerSampleCV, keep.rownames = F)
+Deezer_DT <- data.table(DeezerSampleCV, keep.rownames = FALSE)
 
 ## 5. Create sparse matrix (leave is_listened out because we want to predict it). -1 deletes the first column because this function genrates a new first column with 1s filled out
 sparse_train <- sparse.model.matrix(is_listened ~.-1, data = Deezer_DT)
@@ -1403,7 +1395,7 @@ dim(sparse_train) # Check the dimensions
 output_vector <- DeezerSampleCV[,"is_listened"] == 1
 ```
 
-Now that we have set up the data we can run the HT and CV.
+Now that we have set up the data we can run the HT and CV. Grid search and manual search are two of the most common used strategies for hyper-parameter tuning. Bergstra and Bengio (2012) ([link](http://www.jmlr.org/papers/volume13/bergstra12a/bergstra12a.pdf)) show empirically and theoretically that randomly chosen trials are more efficient for hyper-parameter tuning than trials on a grid. Therefore, we decided to go with random values in our grid.
 
 ```{r}
 ## 1. We initialize a list and some variables
