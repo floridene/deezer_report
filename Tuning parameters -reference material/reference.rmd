@@ -7,6 +7,9 @@ date: "29 May 2017"
 ## Reference:
 - Tips from Kaggle grand master "raddar" | Currently ranked 5th on Kaggle
 
+## source:
+- https://www.slideshare.net/DariusBaruauskas/tips-and-tricks-to-win-kaggle-data-science-competitions
+
 ## Categorical features
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/encoding.PNG)
 
@@ -40,6 +43,3 @@ summary(train_test)
 
 ### Our approach
 Fine tuning paramaters manually gave us more flexibility and we were able to apply gained knowledge from previous tries. We were able to run models locally on laptop and accuracy was also nearly matching one hot encoding and grid search approach. 
-
-## source:
-- https://www.slideshare.net/DariusBaruauskas/tips-and-tricks-to-win-kaggle-data-science-competitions
