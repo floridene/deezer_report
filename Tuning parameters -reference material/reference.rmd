@@ -1,0 +1,20 @@
+---
+title: "Parameters tuning and categorical encoding guide"
+author: "Team Ten | BSEL"
+date: "29 May 2017"
+---
+
+## Reference:
+- Tips from Kaggle grand master "raddar" | Currently ranked 5th on Kaggle
+
+## Categorical features
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/encoding.PNG)
+
+## Best rule for parameters tuning = experience + intuition + resources at hand
+
+ ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/param%20tuning%20grid.PNG)
+
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/param%20tuning%20manual.PNG)
+
+## source:
+- https://www.slideshare.net/DariusBaruauskas/tips-and-tricks-to-win-kaggle-data-science-competitions
