@@ -10,6 +10,28 @@ date: "29 May 2017"
 ## Categorical features
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/encoding.PNG)
 
+- We have used label encoding method as well for XGBoost and LightGBM models. Compared to one hot encoding, this approach was computationally much faster. We were able to run models locally on laptop and accuracy was also nearly matching one hot encoding approach. 
+
+#### Covert to all numeric data (This is primary requirement of XGboost model)
+
+train_test %>% mutate_if(is.factor, as.character) -> train_test
+
+### label encoding
+features= names(train_test)
+
+for (f in features) {
+  if (class(train_test[[f]])=="character") { 
+    levels <- unique(c(train_test[[f]])) 
+    train_test[[f]] <- as.integer(factor(train_test[[f]], levels=levels)) 
+  }
+}
+
+#### convert into numeric 
+train_test[] <- lapply(train_test, as.numeric)
+
+str(train_test)
+
+
 ## Best rule for parameters tuning = experience + intuition + resources at hand
 
  ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/param%20tuning%20grid.PNG)
