@@ -1470,6 +1470,8 @@ write.csv(best_param, file = "best_parameters_FinalCV.csv")
 * [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
 
+In terms of accuracy, XGBoost Sparse model gave us the best accuracy on private leaderboard score however it was computationaly expensive and much time consuming considering the sparse matrix and grid search approach. Other models, such XGBoost (label encoded), LightGBM (super fast) and H2O autoML (extremely fast i.e 90 mins only) were computationally cheap and we were able to run these model locally without server. In terms of accuracy, it was slightly lower than XGBoost Sparse model. 
+
 #### 4 (d) Caret
 
 Caret is a package for feature selection, model tuning and variable importance estimation (see https://topepo.github.io/caret/index.html) and contains 233 different models. It enables to compare different models, but uses a lot of memory for that. We found that short before the deadline. Because of the memory consumption, we interrupted the processing to focus complete to the last runs of cross-validation. In general it should be worth to keep Caret in mind.
@@ -1483,6 +1485,43 @@ While testing the package with a small subset, the following error occured after
 - Insufficient computational power (shared server; other groups; Löcher itself; R is mostly one cored)
 - Missing domain knowledge about music and listening behavior
 - Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
+
+
+----------------------------------------------------------------------------
+#### Specifications of machine used for most XGBoost NUM, H2O and LightGBM models
+----------------------------------------------------------------------------
+
+
+Operating System | System Model | Processor | Memory
+--- | --- | --- | --- 
+Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz (4 CPUs), ~2.9GHz | 16 GB RAM
+
+----------------------------------------------------------------------------
+#### Specifications of machine used for XGBoost Sparse models
+----------------------------------------------------------------------------
+* Dell PowerEdge R730 server 
+* Two Intel Xeon E5-2695 v3 processors
+* 56 Cores
+* 512 GB main memory
+* 14 TB HDD storage 
+* NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory 
+
+
+### Public Leaderboard Score by Time and total number of Submissions
+
+- The competition started on Friday 14 April 2017 UTC and ended on Wednesday 31 May 2017 UTC. Within this 47 days time line, we submitted total of 45 models and below is the screenshot of model accuracy over time. 
+
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/PublicLB.PNG)
+
+- Below is the screenshot illustrating comparison between Public & Private leaderboard score by time and our best models: 
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/3.PNG)
+
+### Below is the statistic about this competition. 
+
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/deezer_poster1.png)
+
+- Out of 220 teams, we were ranked 66th worldwide and 3rd in Germany. 
+![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/rank.PNG)
 
 ## 6. Team Effort
 
