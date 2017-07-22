@@ -1,0 +1,23 @@
+
+
+AutoML: Automatic Machine Learning
+==================================
+
+H2O's AutoML can be used for automating the machine learning workflow, which includes automatic training and tuning of many models within a user-specified time-limit.  The user can also use a performance metric-based stopping criterion for the AutoML process rather than a specific time constraint.  `Stacked Ensembles <http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html>`__ will be automatically trained on the collection individual models to produce a highly predictive ensemble model which, in most cases, will be the top performing model in the AutoML Leaderboard.  Stacked ensembles are not yet available for multiclass classification problems, so in that case, only singleton models will be trained. 
+
+AutoML Interface
+----------------
+
+The H2O AutoML interface is designed to have as few parameters as possible so that all the user needs to do is point to their dataset, identify the response column and optionally specify a time constraint, a maximum number of models constraint, and early stopping parameters. 
+
+ 
+AutoML Output
+-------------
+
+The AutoML object includes a "leaderboard" of models that were trained in the process, ranked by a default metric based on the problem type (the second column of the leaderboard). In binary classification problems, that metric is AUC, and in multiclass classification problems, the metric is mean per-class error. In regression problems, the default sort metric is deviance.  Some additional metrics are also provided, for convenience.
+
+
+
+More details here: 
+* http://h2o-release.s3.amazonaws.com/h2o/master/3888/docs-website/h2o-docs/automl.html
+* https://blog.h2o.ai/2017/06/automatic-machine-learning/

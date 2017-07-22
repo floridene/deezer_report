@@ -11,10 +11,9 @@ This was international student competition where more than 220 universities and 
 
 ## Main files:
 
-* [Report](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd) 
-* [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
+* [Final Report](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd) 
 * [Models- folder](https://github.com/pranavpandya84/deezer_report/tree/master/Models) 
-![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
+  * [XGBoost Sparse model](https://github.com/vhwr/deezer_report/blob/master/02072017_Report.Rmd)(section 4a)
   * [XGBoost Numeric model](https://github.com/pranavpandya84/deezer_report/blob/master/Models/XGBoost_Numeric.rmd)
   * [LightGBM](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LightGBM.rmd)
   * [H2O Automated Machine Learning](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O_autoML.rmd)
@@ -22,6 +21,10 @@ This was international student competition where more than 220 universities and 
   * [H2O Deep Learning - Flow](https://github.com/pranavpandya84/deezer_report/blob/master/Models/H2O%20Flow/H2O%20DL%20Flow/Screenshots.rmd) 
 * [Data used for other models](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
 (Data has also been put in zeno server under "60_data_other_models" and steps from above scripts/ models can be replicated. Dropbox link is to download data and try models locally without need of server.)
+* [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
+* [Reference material](https://github.com/pranavpandya84/deezer_report/blob/master/Tuning%20parameters%20-reference%20material/reference.rmd) (Parameters tuning and categorical encoding guide)
+* [Official documentation](https://github.com/pranavpandya84/deezer_report/tree/master/Tuning%20parameters%20-reference%20material/docs) (Guide for XGBoost, LightGBM and H2O)
+
 
 ## Statistics about this competition:
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/deezer_poster1.png)
@@ -29,6 +32,9 @@ This was international student competition where more than 220 universities and 
 The goal of this challenge was to predict whether the users of the test dataset listened to the first track of Deezer's own music recommendation algorithm proposed them or not. The evaluation metric for this competition was the ROC AUC.
 
 ## Results:
+
+* Model comparison
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
 
 * Rank in Germany by Private Leaderboard Score
 ![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/rank.PNG)

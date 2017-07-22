@@ -1,0 +1,58 @@
+---
+title: "Parameters tuning and categorical encoding guide"
+author: "Team Ten | BSEL"
+date: "29 May 2017"
+---
+
+### Tips from the creator of XGBoost model
+
+1. Is there any risk if I use XGBoost and have correlated features?
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/Capture6.PNG)
+
+2. How XGBoost deals with NAs? 
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/NAs%20in%20xgboost.PNG)
+
+##### (tqchen i.e. Tianqi Chen is the creator of XGBoost model).
+- https://github.com/dmlc/xgboost/blob/master/doc/parameter.md
+
+-----------------------
+
+### Tips from Kaggle grand master "raddar" | Currently ranked 5th on Kaggle
+
+## Categorical features
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/encoding.PNG)
+
+- We have used label encoding method as well for XGBoost and LightGBM models. Compared to one hot encoding, this approach was computationally much faster. 
+
+```{r}
+# Covert to all numeric data (This is primary requirement of XGboost model)
+
+train_test %>% mutate_if(is.factor, as.character) -> train_test
+
+# label encoding
+features= names(train_test)
+for (f in features) {
+  if (class(train_test[[f]])=="character") {
+    levels <- unique(c(train_test[[f]]))
+    train_test[[f]] <- as.integer(factor(train_test[[f]], levels=levels))
+  }
+}
+
+#convert into numeric 
+train_test[] <- lapply(train_test, as.numeric)
+str(train_test)
+summary(train_test)
+```
+
+## Best rule for parameters tuning = experience + intuition + resources at hand
+
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/param%20tuning%20grid.PNG)
+### source:
+- https://www.slideshare.net/DariusBaruauskas/tips-and-tricks-to-win-kaggle-data-science-competitions
+![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/param%20tuning%20manual.PNG)
+
+### Our approach
+Fine tuning paramaters manually gave us more flexibility and we were able to apply gained knowledge from previous tries. We were able to run models locally on laptop and accuracy was also nearly matching one hot encoding and grid search approach. 
+
+
+
