@@ -1472,10 +1472,9 @@ write.csv(best_parameters, file = "best_parameters_FinalCV.csv")
 
 #### 4 (d) Caret
 
-Caret is...
+Caret is a package for feature selection, model tuning and variable importance estimation (see https://topepo.github.io/caret/index.html) and contains 233 different models. It enables to compare different models, but uses a lot of memory for that. We found that short before the deadline. Because of the memory consumption, we interrupted the processing to focus complete to the last runs of cross-validation. In general it should be worth to keep Caret in mind.
 
-But if we tried to use that, the following error occured: "At least one of the class levels is not a valid R variable name; This will cause errors when class probabilities are generated because the variables names will be converted to X0, X1 . Please use factor levels that can be used as valid R variable names". But if we used make.names() as suggested, it's output was identical to the 
-
+While testing the package with a small subset, the following error occured after a while: "At least one of the class levels is not a valid R variable name; This will cause errors when class probabilities are generated because the variables names will be converted to X0, X1 . Please use factor levels that can be used as valid R variable names". But if we used make.names() as suggested, it's output was identical to the column names.
 
 #### 4 (e) SAP Predictive Analysis
 
