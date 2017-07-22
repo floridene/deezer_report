@@ -20,7 +20,7 @@ Therefore, the report will give a short introduction to the dataset at first. Se
 The libraries were used for the project are the following: 
 ```{r Initialization, echo=FALSE, warning=FALSE, message=FALSE}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,xgboost, Matrix,data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot, gridExtra,formattable)
+pacman::p_load(dplyr, xgboost, Matrix, data.table, caret, splitstackshape, ggplot2, psychometric, RColorBrewer, jsonlite, httr, corrplot, gridExtra,formattable)
 #library(ggplot2)
 #library(dplyr)
 #library(RColorBrewer)
@@ -1279,7 +1279,8 @@ DeezerNew_test_0702$yhh <- cos(2 * pi * DeezerNew_test_0702$hh / 24)
 DeezerNew_test_0702 <- subset(DeezerNew_test_0702, select = -hh)
 ```
 
-In the end both files are combined. This was needed for hot endcoding and creating the belonging sparse matrix. Afterwards, all three new datasets are saved. 
+In the end both files are combined. This was needed for hot endcoding and creating the belonging sparse matrix. Afterwards, all three new datasets are saved.
+
 ```{r}
 ## Combine the files
 #DeezerNew_traintest_0702 <- rbind(DeezerNew_train_0621,DeezerNew_test_0702)
@@ -1291,6 +1292,7 @@ In the end both files are combined. This was needed for hot endcoding and creati
 ```
 
 Load new datatables for the modeling part:
+
 ```{r}
 load("/home/Deezer/30_Wrangled_Data/DeezerNew_train_0530.rda")
 load("/home/Deezer/30_Wrangled_Data/DeezerNew_test_0530.rda")
@@ -1299,21 +1301,77 @@ load("/home/Deezer/30_Wrangled_Data/DeezerNew_traintest_0530")
 
 ##4. Modeling
 
-Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models).
+Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models.
 
 This competition is a classification problem. Therefore, there are several classification algorithms to choose from, e.g. logistic regression, decision trees, boosted trees, k-nearest neighbors, singular value decomposition (SVD) and many more.
 
-As gradient boosted trees are extremely powerful and win many kaggle competitions on a regular basis or as kaggle grandmaster Ben Gorman said, "If linear regression was a Toyota Camry, then gradient boosting would be a UH-60 Blackhawk Helicopter" ([link](https://gormanalysis.com/gradient-boosting-explained/)), we immediately decided to use xgboost as our main library for the gradient boosted tree approach. It has won more than half of all kaggle competitions ([link](https://github.com/dmlc/xgboost/tree/master/demo#machine-learning-challenge-winning-solutions)).
+As gradient boosted trees are extremely powerful and win many kaggle competitions on a regular basis or as kaggle grandmaster Ben Gorman said, "If linear regression was a Toyota Camry, then gradient boosting would be a UH-60 Blackhawk Helicopter" ([link](https://gormanalysis.com/gradient-boosting-explained/)), we immediately decided to go with the gradient boosted tree approach. The XGboost library is particularly popular because it has won more than half of all Kaggle competitions ([link](https://github.com/dmlc/xgboost/tree/master/demo#machine-learning-challenge-winning-solutions)). Therefore, we decided to focus on it as our main library.
 
-Furthermore, we also tried a Naive Bayes and Deep Learning approach. Other libraries to build these models include h2o, lightgbm and naivebayes. In the end though, our best model submitted was based on xgboost. Let us take you through the model building process in the following chapter.
+Furthermore, we also tried a Naive Bayes and a Deep Learning approach. Other libraries to build these models include h2o, lightgbm and naivebayes. In the end though, our best model submitted was based on XGboost. Let us take you through the model building process in the following sub-chapters.
 
-#### 4(a) xgboost
+#### 4(a) XGboost - Sparse
 
-Before xgboost can be used, we needed to set up the data one more time. That is because xgboost cannot handle factors. Our dataset included many factors though. There are two ways dealing with this issue. 
+XGboost only handles numeric values. Our dataset contains a lot of categorical values though. There are two major methods to deal with this issue. One method is called label encoding. Basically a categorical values e.g. male, female and neither are assigned numbers such as 0, 1 and 2. This will then be applied to all categorical values. See the table below.
 
-As we had many factors in our though, we first needed to one-hot encode the dataset and create a sparse matrix.
+```{r echo = FALSE}
+gender <- c("Male", "Female", "Neither", "Trans Male", "Trans Female")
+n <- c(0, 1, 2, 3, 4)
+data.frame(gender, n)
+```
 
-## First, we need to load the data and create a sparse matrix to set up XGBoost properly.
+Surprisingly, XGboost deals with label encoded values very well. However, we felt that this was not the most appropriate method from a statistical perspective. Since XGboost does not possess a memorization feature where it recognizes that data was transformed from a factor to a numeric value we believed it was actually not appropriate to use this method because that would mean that "Female" is higher/bigger/larger/ than "Male" because it has a larger value. However, in chapter 4(b) you will see that it also achieved a high accuracy.
+
+Therefore, we decided to use another method which is called one-hot encoding. Another aspect that added weight for this method was that we touched this topic when we talked about regularization. What follows now is a description of how we built our very first XGboost - Sparse model. It is based on a tutorial ([link](http://xgboost.readthedocs.io/en/latest/R-package/discoverYourData.html)) that is included in the official XGboost documentation.
+
+We also reviewed the parameters in the official documentation ([link](https://github.com/dmlc/xgboost/blob/master/doc/parameter.md)) and on Analytics Vidhya ([link](https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/)) which offers a nice guide that explains the parameters in more detail.
+
+In this very first model we didn't include all the features we developed over the course because at that time we were still working on the feature engineering part. Thus, in this model we included the BPM and genre features.
+
+```{r}
+## 0. Load the data
+load("~/30_Wrangled_Data/Archiv/Deezer_new.rda")
+
+## 1. Wrap full_dataset with data.table because its performance for large datasets is best in class.
+df <- data.table(DeezerNew_all, keep.rownames = F)
+summary(df) # Check for any NAs because XGboost can also not deal with those.
+
+## 2. Create Sparse Matrix. We leave "is_listened" out because we want to predict it (is_listened ~. means all categorical features are converted to binary values except the "is_listened" column). Unfortunately, this will take around 5 minutes on the server.
+sparse_matrix <- sparse.model.matrix(is_listened ~.-1, data = df)
+dim(sparse_matrix) # As you can see, this is a gigantic sparse matrix.
+
+## 2.1. Split the Sparse Matrix up according to the train (7558834 rows) and test (remaining rows) data. We will only choose the first 100 columns for demonstration purposes. In a real setting the columns would not be restricted. 
+sparse_train <- sparse_matrix[1:7558834,1:100]
+sparse_test <- sparse_matrix[7558835:7578752,1:100]
+
+dim(sparse_test)
+dim(sparse_train)
+
+## 3. Create the numeric output vector for XGboost. This will be our label for the model. It generates a vector that is TRUE for every is_listened == 1 and FALSE otherwise.
+output_vector <- DeezerNew_all[1:7558834,"is_listened"] == 1
+
+## 4. Build the model. The parameters are chosen based on what we believed was "right" after reading through the official documentation.
+bst <- xgboost(data = sparse_train,
+               label = output_vector,
+               max.depth = 6,
+               eta = 0.2,
+               verbose = 1,
+               nrounds = 10, #We limit the number of training rounds to 10 for demonstration purposes
+               nthread = 32,
+               early_stopping_rounds = 10,
+               eval_metric = "auc",
+               objective = "binary:logistic")
+
+## 4.1. Fit the model.
+XGpred <- predict(bst, sparse_test)
+
+## 5. Create a submission file
+submission <- read.csv("~/10_Basic_Dataset/sample_submission_kaggle.csv")
+submission$is_listened <- XGpred
+write.csv(submission, "OHE_xgb300_May17_wo_profileID.csv", row.names = FALSE)
+```
+
+This was our first XGboost - sparse model. It scored 0.58639 in the public leaderboard and 0.59343 in the private leaderboard. Not a very good result.
+
 ```{r setup, include=FALSE}
 ## 1. Load the data
 library(xgboost)
@@ -1427,7 +1485,7 @@ But if we tried to use that, the following error occured: "At least one of the c
 - Missing domain knowledge about music and listening behavior
 - Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
 
-## 6. Team effot
+## 6. Team Effort
 
 
 
