@@ -21,8 +21,8 @@ This was international student competition where more than 220 universities and 
 * [Data used for other models](https://www.dropbox.com/sh/1ubsg7qhovifgoj/AAAZb1hOTBESDrI3jbuYQkULa?dl=0)
 (Data has also been put in zeno server under "60_data_other_models" and steps from above scripts/ models can be replicated. Dropbox link is to download data and try models locally without need of server.)
 * [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
-* [Reference material -Parameters tuning and categorical encoding guide] (https://github.com/pranavpandya84/deezer_report/blob/master/Tuning%20parameters%20-reference%20material/reference.rmd)
-* [Official documentation/ guide for XGBoost, LightGBM and H2O] (https://github.com/pranavpandya84/deezer_report/tree/master/Tuning%20parameters%20-reference%20material/docs)
+* [Reference material](https://github.com/pranavpandya84/deezer_report/blob/master/Tuning%20parameters%20-reference%20material/reference.rmd) (Parameters tuning and categorical encoding guide)
+* [Official documentation](https://github.com/pranavpandya84/deezer_report/tree/master/Tuning%20parameters%20-reference%20material/docs) (Guide for XGBoost, LightGBM and H2O)
 
 
 ## Statistics about this competition:
