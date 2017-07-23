@@ -1667,15 +1667,18 @@ This project was mainly divided into two main parts - into feature engineering a
 
 In detailed, the tasks were divided as the following:
 
-  * Max: 
+   * Chris: 
+   
+   * Dennis:
+   
+   * Max: 
 
-  * Vera: 
-
-  * Pranav: 
+   * Pranav: 
   
-  * Chris: 
+   * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gabs. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
 
-  * Dennis:
+
+   
 
 
 
