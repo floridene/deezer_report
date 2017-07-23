@@ -1586,7 +1586,7 @@ ggplot(mat[1:20,], aes(reorder(Feature, Gain), Gain)) +
   labs(x = "Feature", y = "Contribution", title = "Feature Importance", caption = "Source: XGboost Trained Model")
 ```
 
-As you can see our new features "profile_ID" and "Bahavior" had quite an impact. This model was our best one. It scored an AUC value of 0.6380 (0.58639) in the public leaderboard and 0.6380 (0.59343) in the private leaderboard. That is an improvement of around 8.5%.
+As you can see our new features "profile_ID" and "Bahavior" had quite an impact. This model was our best one. It achieved an AUC score of 0.63749 (0.58639) in the public leaderboard and 0.63860 (0.59343) in the private leaderboard. That is an improvement of around 8.7% and 7.6% respectively.
 
 #### 4 (b) Other models
 
@@ -1638,7 +1638,9 @@ Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz 
 * 56 Cores
 * 512 GB main memory
 * 14 TB HDD storage 
-* NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory 
+* NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory
+
+Pranav and Christian were responsible for the modeling part. While Pranav applied a variety of different packages (h20, LightGBM, XGboost), Christian focused on the sparse XGboost approach. He converted dense dataframes into sparse matrices and implemented hyperparameter tuning in combination with cross-validation to improve the model's accuracy.
 
 
 ## 6. Public Leaderboard Score by Time and total number of Submissions
