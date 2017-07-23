@@ -1155,12 +1155,6 @@ behavior_album_molten <- melt(behavior_album, id.vars="user_id",variable.name="a
 
 Sadly the computation was not fast enough to enable us to get a final prediction with the new features. But we ran some hyper tuned models after the competition and will present the results later on.
 
-```{r}
-#knitr::knit_exit()
-rm(list = ls())
-```
-
-
 #### 3 (i) Creating the New Dataset
 
 The last step before we start with modeling, it is needed to merge all new features by their look up tables with the old dataset. As some of the merges were quite time intensive (even on the zeno server), we execute the code just for the test dataset for illustrating how it works.
