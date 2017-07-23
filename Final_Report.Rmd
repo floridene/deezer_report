@@ -1348,6 +1348,8 @@ As gradient boosted trees are extremely powerful and win many kaggle competition
 
 Furthermore, we also tried a Naive Bayes and a Deep Learning approach. Other libraries to build these models include h2o, lightgbm and naivebayes. In the end though, our best model submitted was based on XGboost. Let us take you through the model building process in the following sub-chapters.
 
+As a general note, we usually tested our model in an RMD file in RStudio on the Zeno server. If everything worked, we would stick our code into a regular R file (R script) and ran the code via Bash and the screen command. This allowed us to run the code for several days while closing the terminal.
+
 #### 4(a) XGboost - Sparse
 
 XGboost only handles numeric values. Our dataset contains a lot of categorical values though. There are two major methods to deal with this issue. One method is called label encoding. Basically a categorical values e.g. male, female and neither are assigned numbers such as 0, 1 and 2. This will then be applied to all categorical values. See the table below.
