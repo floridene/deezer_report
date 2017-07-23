@@ -1663,8 +1663,23 @@ Below is the statistic about this competition.
 
 ## 6. Team Effort
 
-Pranav & Chris (& Dennis): Modeling
-Max & Vera (& Dennis): Feature Engineering
-Dennis has the role of a supporter. He took care of all possible task...
+This project was mainly divided into two main parts - into feature engineering and modeling. Therefore, the tasks were done in subgroups of two or three people. Paranv and Chris focused on different modeling approaches, including cross validation and hyper parameter tuning, while Max and Vera created our new features. In the whole project, Dennis took over the role as a supporter. So, he took care of some tasks which needed additional manpower. Overall, we discussed our results in meetings in a biweekly manner. This helped a lot according to updating other group members, questioning some approaches and brainstorming for new ideas. 
+
+In detailed, the tasks were divided as the following:
+
+  * Max: 
+
+  * Vera: 
+
+  * Pranav: 
+  
+  * Chris: 
+
+  * Dennis:
+
+
+
+
+
 
 
