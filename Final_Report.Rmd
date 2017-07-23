@@ -1610,6 +1610,12 @@ While testing the package with a small subset, the following error occured after
 
 #### 4 (e) SAP Predictive Analysis
 
+Just out of curiosity we tried a little competition: SAP Predictive Analysis vs. R . Based on the lectures of Nancy Jones (San Diego State University) we explored the possibilities of SAP PA. We hoped, that we can import also R models to test them with automatic visualization. Unfortunately, that is not possible. Therefore we had run the complete model creation.
+
+The used dataset was DeezerNew_train_0530.csv with 7,558,834 and 25 features. The learning phase took all in all 76 minutes. The chosen prediction engine by SAP Predictive Analysis was Kxen.RobustRegression. In the end it just kept 10 features, where the feature profile_id contributed the most. But the accuracy of the predictions were not that high, it ends up with a low scoring of 0.4798 . Because of the less influence factors, there was no possibility to improve the scoring.
+
+SAP Predictive Analysis can be a suggestion for Managers with a low Data Science background. It is really good, that a complete summary page (as HTML, in the folder Models) is prepared to take into meetings and one summary slide to put into a presentation. With R are the possibilities nearly endless, but you have to know what to do and create the figures and numbers by your own. The advantage is, that you can get a better prediction power.
+
 ## 5. Reflection
 
 - Insufficient computational power (shared server; other groups; Löcher itself; R is mostly one cored)
@@ -1636,8 +1642,6 @@ Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz 
 * 14 TB HDD storage 
 * NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory
 
-Pranav and Christian were responsible for the modeling part. While Pranav applied a variety of different packages (h20, LightGBM, XGboost), Christian focused on the sparse XGboost approach. He converted dense dataframes into sparse matrices and implemented hyperparameter tuning in combination with cross-validation to improve the model's accuracy.
-
 
 ## 6. Public Leaderboard Score by Time and total number of Submissions
 
@@ -1655,28 +1659,18 @@ Below is the statistic about this competition.
 - Out of 220 teams, we were ranked 66th worldwide and 3rd in Germany. 
 ![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/rank.PNG)
 
-## 6. Team Effort
+## 7. Team Effort
 
-This project was mainly divided into two main parts - into feature engineering and modeling. Therefore, the tasks were done in subgroups of two or three people. Paranv and Chris focused on different modeling approaches, including cross validation and hyper parameter tuning, while Max and Vera created our new features. In the whole project, Dennis took over the role as a supporter. So, he took care of some tasks which needed additional manpower. Overall, we discussed our results in meetings in a biweekly manner. This helped a lot according to updating other group members, questioning some approaches and brainstorming for new ideas. 
+This project was mainly divided into two main parts - into feature engineering and modeling. Therefore, the tasks were done in subgroups of two or three people. Paranv and Chris focused on different modeling approaches, including cross validation and hyper parameter tuning, while Max and Vera created our new features. In the whole project, Dennis took over the role as a supporter. So, he took care of some tasks which needed additional manpower. Overall, we discussed our results in meetings in a biweekly manner. This helped a lot according to updating other group members, questioning some approaches and brainstorming for new ideas.
 
 In detailed, the tasks were divided as the following:
 
-   * Chris: 
+   * Chris: Christian focused on the sparse XGboost approach. He converted dense dataframes into sparse matrices and implemented hyperparameter tuning in combination with cross-validation to improve the model's accuracy.
    
-   * Dennis:
+   * Dennis: While the subgroups for feature engineering and modelling were already formed and worked in efficient groups, he concentrated to supporting and independed tasks. He tried Naive Bayes to find out, if the trade-off between speed and accuracy makes sense. Furthermore he did research about Caret for feature and model selection and compared SAP Predictive Analysis with the group results.
    
    * Max: 
 
-   * Pranav: 
+   * Pranav: Pranav applied a variety of different packages (h20, LightGBM, XGboost).
   
-   * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gabs. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
-
-
-   
-
-
-
-
-
-
-
+   * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gaps. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
