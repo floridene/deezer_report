@@ -1367,7 +1367,7 @@ We also reviewed the parameters in the official documentation ([link](https://gi
 In this very first model we didn't include all the features we developed over the course because at that time we were still working on the feature engineering part. Thus, in this model we included the BPM and genre features.
 
 ```{r}
-## 0. Load the data
+## 0. Load the data.
 load("~/30_Wrangled_Data/Archiv/Deezer_new.rda")
 
 ## 1. Wrap full_dataset with data.table because its performance for large datasets is best in class.
@@ -1378,32 +1378,32 @@ summary(df) # Check for any NAs because XGboost can also not deal with those.
 sparse_matrix <- sparse.model.matrix(is_listened ~.-1, data = df)
 dim(sparse_matrix) # As you can see, this is a gigantic sparse matrix.
 
-## 2.1. Split the Sparse Matrix up according to the train (7558834 rows) and test (remaining rows) data. We will only choose the first 100 columns for demonstration purposes. In a real setting the columns would not be restricted. 
-sparse_train <- sparse_matrix[1:7558834,1:100] #sparse_matrix[1:7558834,] in our real code
-sparse_test <- sparse_matrix[7558835:7578752,1:100] #sparse_matrix[7558835:7578752,] in our real code
+## 2.1. Split the Sparse Matrix up according to the train (7558834 rows) and test (remaining rows) data. We will limit the number of rows for demonstration purposes. In a real setting the rows would not be restricted. 
+sparse_train <- sparse_matrix[1:50000,]    # sparse_matrix[1:7558834,] in our real code
+sparse_test <- sparse_matrix[50001:60000,] # sparse_matrix[7558835:7578752,] in our real code
 
 dim(sparse_test)
 dim(sparse_train)
 
 ## 3. Create the Boolean output vector for XGboost. This will be our label for the model. It generates a vector that is TRUE for every is_listened == 1 and FALSE otherwise.
-output_vector <- DeezerNew_all[1:7558834,"is_listened"] == 1
+output_vector <- DeezerNew_all[1:50000,"is_listened"] == 1 # DeezerNew_all[1:7558835,"is_listened"] == 1 in our real code.
 
 ## 4. Build the model. The parameters are chosen based on what we believed was "right" after reading through the official documentation.
-bst <- xgboost(data = sparse_train,           #Data source to train the model
-               label = output_vector,         #Response variable
-               max.depth = 6,                 #Max depth of the tree
-               eta = 0.2,                     #Learning rate, describes the weight of a newly built tree
-               verbose = 1,                   #Information output
-               nrounds = 10,                  #Number of rounds. We limit the number of training rounds to 10 for demonstration purposes
-               nthread = 32,                  #Number of CPUs
-               early_stopping_rounds = 10,    #Number of rounds when the program should stop training without seeing an improvement
-               eval_metric = "auc",           #Evaluation metric. Since the Evaluation metric is AUC in the competition, we chose this one
-               objective = "binary:logistic") #Definition of the loss function that shall be minimized. This is a probabilistic binary classification problem (values ranging from 0 to 1). Therefore, we chose "binary:logistic"
+bst <- xgboost(data = sparse_train,           # Data source to train the model.
+               label = output_vector,         # Response variable.
+               max.depth = 6,                 # Max depth of the tree.
+               eta = 0.2,                     # Learning rate, describes the weight of a newly built tree.
+               verbose = 1,                   # Information output.
+               nrounds = 10,                  # Number of rounds. We limit the number of training rounds to 10 for demonstration purposes.
+               nthread = 32,                  # Number of CPUs.
+               early_stopping_rounds = 10,    # Number of rounds when the program should stop training without seeing an improvement.
+               eval_metric = "auc",           # Evaluation metric. Since the Evaluation metric is AUC in the competition, we chose this one.
+               objective = "binary:logistic") # Definition of the loss function that shall be minimized. This is a probabilistic binary classification problem (values ranging from 0 to 1). Therefore, we chose "binary:logistic".
 
 ## 4.1. Fit the model.
 XGpred <- predict(bst, sparse_test)
 
-## 5. Create a submission file
+## 5. Create a submission file.
 submission <- read.csv("~/10_Basic_Dataset/sample_submission_kaggle.csv")
 submission$is_listened <- XGpred
 write.csv(submission, "OHE_xgb300_May17_wo_profileID.csv", row.names = FALSE)
@@ -1417,7 +1417,7 @@ Our main considerations for improvement were:
   * Hyperparameter Tuning (HT)
   * Cross-validation (CV)
 
-The following code describes our best model. Note, to fully understand what is happening, we only restricted the number of rounds and iterations in the HT+CV and fitting phases. Considering that the sparse matrix is huge, please allow the script to run for round about 7 minutes to prepare the data.
+The following code describes our best model. Note, to fully understand what is happening, we only restricted the number of rounds and iterations in the HT+CV and fitting phases. Considering that the sparse matrix is huge, please allow the script to run for round about 7 minutes to prepare the data. Please make sure you run the script on the server.
 
 We start with HT and CV.
 
@@ -1437,7 +1437,7 @@ Deezer_DT <- data.table(DeezerSampleCV, keep.rownames = FALSE)
 
 ## 5. Create sparse matrix (leave is_listened out because we want to predict it). -1 deletes the first column because this function genrates a new first column with 1s filled out
 sparse_train <- sparse.model.matrix(is_listened ~.-1, data = Deezer_DT)
-dim(sparse_train) # Check the dimensions
+dim(sparse_train) # Check the dimensions.
 
 ## 6. Create the Boolean output vector for XGboost. This will be our label for the model. It generates a vector that is TRUE for every is_listened == 1 and FALSE otherwise.
 output_vector <- DeezerSampleCV[,"is_listened"] == 1
@@ -1446,32 +1446,32 @@ output_vector <- DeezerSampleCV[,"is_listened"] == 1
 Now that we have set up the data we can run the HT and CV. Grid search and manual search are two of the most common used strategies for hyper-parameter tuning. Bergstra and Bengio (2012) ([link](http://www.jmlr.org/papers/volume13/bergstra12a/bergstra12a.pdf)) show empirically and theoretically that randomly chosen trials are more efficient for hyper-parameter tuning than trials on a grid. Therefore, we decided to go with random values in our grid.
 
 ```{r}
-## 1. We initialize a list and some variables
-best_param <- list()    # Create an empty list to store our results
-best_seednumber <- 1234 # Set an initial seed for reproducability
+## 1. We initialize a list and some variables.
+best_param <- list()    # Create an empty list to store our results.
+best_seednumber <- 1234 # Set an initial seed for reproducability.
 best_logloss <- Inf
 best_logloss_index <- 0
 
-## 2. We then initialize a for loop that runs through several parameter combinations
-for (iter in 1:4) { # for (iter in 1:500) in our real code
+## 2. We then initialize a for loop that runs through several parameter combinations.
+for (iter in 1:4) { # for (iter in 1:250) in our real code
   
   ## Our parameter list. This is the HT part.
-  param <- list(objective = "binary:logistic",       # Definition of the loss function
-                eval_metric = "logloss",             # Evaluation metric
-                max_depth = sample(6:12, 1),         # Max depth of the trees between 6 and 12
-                eta = runif(1, .01, .3),             # Learning rate between 0.01 and 0.3
-                gamma = runif(1, 0.0, 0.2),          # Specifies the minimum loss reduction required to make a split in a node. Higher values make the algorithm more conservative
+  param <- list(objective = "binary:logistic",       # Definition of the loss function.
+                eval_metric = "logloss",             # Evaluation metric.
+                max_depth = sample(6:12, 1),         # Max depth of the trees between 6 and 12.
+                eta = runif(1, .01, .3),             # Learning rate between 0.01 and 0.3.
+                gamma = runif(1, 0.0, 0.2),          # Specifies the minimum loss reduction required to make a split in a node. Higher values make the algorithm more conservative.
                 subsample = runif(1, .6, .9),        # Denotes the fraction of observations to be random samples for each tree.
-                colsample_bytree = runif(1, .5, .8), # Denotes the fracation of columns to be randomly chosen. 1 means to choose all columns
-                min_child_weight = sample(1:40, 1),  # Defines the minimum sum of weights of all observations required in a child. Higher values prevent the model from over-fitting
-                max_delta_step = sample(1:10, 1)     # Introduces an "absolute" regularization, capping the weight before eta is applied. Higher values make the algortihm more conservative
+                colsample_bytree = runif(1, .5, .8), # Denotes the fracation of columns to be randomly chosen. 1 means to choose all columns.
+                min_child_weight = sample(1:40, 1),  # Defines the minimum sum of weights of all observations required in a child. Higher values prevent the model from over-fitting.
+                max_delta_step = sample(1:10, 1)     # Introduces an "absolute" regularization, capping the weight before eta is applied. Higher values make the algortihm more conservative.
                 )
 
   ## Additional information which we need for the CV. This is the CV part.
-	cv_nround <- 5 # Set the number of training rounds. In our real code this was set to 300.
-	cv_nfold <- 5 # Set the number of folds. 5 is a standard value
-	seed_number = sample.int(10000, 1)[[1]] # Choose a random number
-	set.seed(seed_number) # Set a seed for reproducability   
+	cv_nround <- 5                          # Set the number of training rounds. In our real code this was set to 300.
+	cv_nfold <- 5                           # Set the number of folds. 5 is a standard value.
+	seed_number = sample.int(10000, 1)[[1]] # Choose a random number.
+	set.seed(seed_number)                   # Set a seed for reproducability.
 	message("Iteration Round: ", as.character(iter), appendLF = FALSE) # Check at which iteration we are.
   
 	## The actual CV model that uses a HT combination from above.
@@ -1499,9 +1499,94 @@ for (iter in 1:4) { # for (iter in 1:500) in our real code
 		}
 }
 
-## Finally, we save the best parameters in a CSV
+## Finally, we save the best parameters in a CSV file to add the parameters to our final model later. Alternatively, we could have just added thoses parameters to the parameter settings of the final model.
 write.csv(best_param, file = "best_parameters_FinalCV.csv")
 ```
+
+It is time for the final model building part. We have to apply our best settings to train the model on the full dataset. Once, again we start with a little bit of data preparation.
+
+```{r}
+## 0. Just to make sure we have the correct source data, we load it once again. These are the train, test and combined datasets.
+load("~/30_Wrangled_Data/Deezer_train_0525.rda")
+load("~/30_Wrangled_Data/Deezer_test_0525.rda")
+load("~/30_Wrangled_Data/Deezer_traintest_0525.rda")
+
+## 1. In each dataset we delete the "sample_id".
+DeezerNew_traintest_0525 <- subset(DeezerNew_traintest_0525, select = -sample_id)
+DeezerNew_train_0525 <- subset(DeezerNew_train_0525, select = -sample_id)
+DeezerNew_test_0525 <- subset(DeezerNew_test_0525, select = -sample_id)
+
+## 2. This time we wrap the the combined dataset in a data.table for faster computation.
+Deezer_DT <- data.table(DeezerNew_traintest_0525, keep.rownames = F)
+
+## 3. Once again, we create a Sparse Matrix (leave is_listened out because we want to predict it). -1 deletes the first column because this function genrates a new first column with 1s filled out.
+sparse_matrix <- sparse.model.matrix(is_listened ~.-1, data = Deezer_DT)
+dim(sparse_matrix)
+
+## 3.1. Split the Sparse Matrix up according to the train (7558834 rows) and test (remaining rows) data.
+sparse_train <- sparse_matrix[1:nrow(DeezerNew_train_0525),]
+sparse_test <- sparse_matrix[7558835:nrow(DeezerNew_traintest_0525),]
+
+dim(sparse_test)
+dim(sparse_train)
+
+## 4. Create the Boolean output vector for XGboost. This will be our label for the model. It generates a vector that is TRUE for every is_listened == 1 and FALSE otherwise.
+output_vector <- DeezerNew_train_0525[,"is_listened"] == 1
+```
+
+Now we set up the model and add our best parameters. During the competition we added those parameters manually from the CSV file because we always ran a normal R script on the Zeno server via bash and the "screen" command.
+
+```{r}
+## We already added the best model parameters.
+param <- list(objective = "binary:logistic",
+              eval_metric = "logloss",
+              max_depth = 10,
+              eta = .211,
+              gamma = .0509,
+              subsample = .65,
+              colsample_bytree = .534,
+              min_child_weight = 2,
+              max_delta_step = 10
+              )
+
+## Model Input
+XGB_300_fulldataset_0526 <- xgboost(params = param,
+                                    data = sparse_train,
+                                    label = output_vector,
+                                    verbose = TRUE,
+                                    nrounds = 300,
+                                    nthread = 32,
+                                    early_stopping_rounds = 20,
+                                    maximize = FALSE
+                                    )
+
+XGB_300_fulldataset_0526_Pred <- predict(XGB_300_fulldataset_0526, sparse_test)
+
+## Create submission file
+submission <- read.csv("~/10_Basic_Dataset/sample_submission_kaggle.csv")
+submission$is_listened <- XGB_300_fulldataset_0526_Pred
+write.csv(submission,"XGB_300_fulldataset_0526_Pred",row.names = FALSE)
+```
+
+Let's see which features were the most important ones. Note, XGboost allows you to save trained models. We saved a model that has the same input as above but was only trained for 100 rounds. Difference between the 300 and 100 round model should be relatively small. For convenience reasons we are going to load the 100 round model and plot the feature importance on it.
+
+```{r}
+bst <- xgb.load("XGB_100_fulldataset_0527.model")
+prediction <- predict(bst, sparse_test)
+
+mat <- xgb.importance(feature_names = sparse_matrix@Dimnames[[2]], model = bst)
+print(mat)
+xgb.plot.importance(xlab = "Contribution", ylab = "Feature", importance_matrix = mat[1:20])
+
+## Relative Importance
+xgb.plot.importance(mat[1:20], rel_to_first = TRUE, xlab = "Relative importance")
+ggplot(mat[1:20,], aes(reorder(Feature, Gain), Gain)) +
+  geom_col(fill = "lightblue") +
+  coord_flip() +
+  labs(x = "Feature", y = "Contribution", title = "Feature Importance", caption = "Source: XGboost Trained Model")
+```
+
+As you can see our new features "profile_ID" and "Bahavior" had quite an impact. This model was our best one. It scored an AUC value of 0.6380 (0.58639) in the public leaderboard and 0.6380 (0.59343) in the private leaderboard. That is an improvement of around 8.5%.
 
 #### 4 (b) Other models
 
