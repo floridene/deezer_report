@@ -475,8 +475,53 @@ In a brainstorming session we thought about additional factors, which influences
 
 If one is thinking to the parents music taste, one could claim, that elder people tend to listen to older songs. One explanation could be, those users tend to listen to songs from their "youth". The question was, if the properties user_age and year of release_date correlate. Unfortunately, user_age and release_date were not significant in our first models.
 
-User's language vs. song language
-------> ToDo: Pranav, what happend with that approach?
+#### Exploring new features with language detection
+
+This approach was to further explore "extra info" data to check whether language detection can help identify new features or not. At first, we did text cleaning and then "textcat" package to identify unique language from song title, album title and artist's name. The next step was to include logical interaction between this variables. For example, if song language and album language is exact same them grouping them, else considering it as variation. Below is the step by step procedure followed to extract this language features. 
+
+```{r}
+# Add new features: join json file with media description (categorical variables)
+extra = stream_in(file("~/60_data_other_models/extra_infos.json"))
+
+str(extra)
+
+##################################################
+## add language feats (detect lang)
+##################################################
+
+library("textcat")
+library("rvest")
+library("stringr")
+
+#text cleaning (in order to assign unique numeric value)
+extra[] = lapply(extra, tolower)
+extra[] = lapply(extra, removePunctuation)
+extra[] = lapply(extra, stripWhitespace)
+
+extra$songLang = textcat(extra$sng_title)
+extra$albLang = textcat(extra$alb_title)
+extra$artistLang = textcat(extra$art_name)
+
+#if song lang and alb lang is exact same them grouping them, else considering it as variation
+extra$langSngAlb = ifelse(extra$songLang  == extra$albLang, extra$albLang, "variation")
+extra$langAlbArt = ifelse(extra$albLang == extra$artistLang, extra$artistLang, "variation")
+extra$langSngArt = ifelse(extra$songLang  == extra$artistLang, extra$artistLang, "variation")
+
+extra$langReg = ifelse(extra$songLang  == "french" | extra$songLang  == "german" | extra$songLang  == "spanish" |
+                       extra$songLang  == "swedish" |  extra$songLang  == "italian" | 
+                       extra$songLang  == "polish", "TopEuLang", "EnglishOrOther")
+str(extra)
+extra$media_id = as.numeric(extra$media_id)
+
+# save(extra,file="extra_feats11.rda")
+
+#add to train_test dataset
+train_test = left_join(train_test, extra, by = "media_id")
+str(train_test)
+```
+
+We checked importance of this language features through feature importance matrix in various XGBoost (label encoded), LightGBM and H2O models but their contributioin to accuracy was relatively low. The illustration of feature importance is included at the end of XGBoost NUM and LightGBM model's script. 
+* [LightGBM](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LightGBM.rmd)(scroll down to the bottom for feature importance matrix)
 
 #### 3 (d) Genre_id
 
@@ -1645,11 +1690,12 @@ In detailed, the tasks were divided as the following:
    
    * Dennis: While the subgroups for feature engineering and modelling were already formed and worked in efficient groups, he concentrated to supporting and independed tasks. He tried Naive Bayes to find out, if the trade-off between speed and accuracy makes sense. Furthermore he did research about Caret for feature and model selection and compared SAP Predictive Analysis with the group results.
    
-   * Max: 
+   * Max: Max focused on feature engineering and teamed up with Vera alot of the time. Since coding as a duo is, how the group found out for themself, really benefitial for qualitative working time. Max came up with the idea for the "behavior"-features and coded clustering and genre-id-cleaning. 
 
    * Pranav: Pranav applied a variety of different packages (h20, LightGBM, XGboost).
   
    * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gaps. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
+<<<<<<< HEAD
    
 #### 6 (b) Reflection
 
@@ -1711,3 +1757,5 @@ Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz 
 * Missing domain knowledge of music and listening behavior
 
 * Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
+=======
+>>>>>>> 07117c436612161dce9dc3b070f8d6a238ca1d80
