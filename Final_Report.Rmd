@@ -160,7 +160,7 @@ The dataset contains `r length(unique(Deezer$media_id))` different media_ids. On
 One example is covered by the following data table:
 
 ```{r echo = FALSE, message=FALSE, warning=FALSE}
-extra = stream_in(file("/home/Deezer/10_Basic_Dataset/extra_infos.json"))
+load("/home/Deezer/deezer_report/extra.rda")
 ```
 
 ```{r}
