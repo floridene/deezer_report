@@ -1669,7 +1669,7 @@ In detailed, the tasks were divided as the following:
    
    * Dennis: While the subgroups for feature engineering and modelling were already formed and worked in efficient groups, he concentrated to supporting and independed tasks. He tried Naive Bayes to find out, if the trade-off between speed and accuracy makes sense. Furthermore he did research about Caret for feature and model selection and compared SAP Predictive Analysis with the group results.
    
-   * Max: 
+   * Max: Max focused on feature engineering and teamed up with Vera alot of the time. Since coding as a duo is, how the group found out for themself, really benefitial for qualitative working time. Max came up with the idea for the "behavior"-features and coded clustering and genre-id-cleaning. 
 
    * Pranav: Pranav applied a variety of different packages (h20, LightGBM, XGboost).
   
