@@ -1660,7 +1660,7 @@ As you can see our new features "profile_ID" and "Bahavior" had quite an impact.
 #### 4(c) Thoughts on the Best Model
 
 * [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
-![Private LB](/home/Deezer/deezer_report/2.PNG)
+![Private LB](/home/Deezer/deezer_report/2.png)
 
 In terms of accuracy, the XGBoost Sparse model gave us the best accuracy on private leaderboard score however it was computationaly expensive and much time consuming considering the sparse matrix and grid search approach. Other models, such XGBoost (label encoded), LightGBM (super fast) and H2O autoML (extremely fast i.e 90 mins only) were computationally cheap and we were able to run these model locally without the server. In terms of accuracy, it was slightly lower than XGBoost Sparse model. 
 
@@ -1683,7 +1683,7 @@ SAP Predictive Analysis can be a suggestion for Managers with a low Data Science
 
 - The competition started on Friday 14 April 2017 UTC and ended on Wednesday 31 May 2017 UTC. Within this 47 days time line, we submitted total of 45 models and below is the screenshot of model accuracy over time. 
 
-![Public Leaderboard](/home/Deezer/deezer_report/PublicLB.PNG)
+![Public Leaderboard](/home/Deezer/deezer_report/PublicLB.png)
 
 - Below is the screenshot illustrating comparison between Public & Private leaderboard score by time and our best models: 
 ![Overall Leaderboard](/home/Deezer/deezer_report/3.png)
@@ -1693,7 +1693,7 @@ Below is the statistic about this competition.
 ![Deezer Poster](/home/Deezer/deezer_report/deezer_poster1.png)
 
 - Out of 220 teams, we were ranked 66th worldwide and 3rd in Germany. 
-![Ranking](/home/Deezer/deezer_report/rank.PNG)
+![Ranking](/home/Deezer/deezer_report/rank2.png)
 
 
 ## 6. Team Effort & Reflection
