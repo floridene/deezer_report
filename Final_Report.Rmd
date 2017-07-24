@@ -1734,9 +1734,9 @@ In detailed, the tasks were divided as the following:
 * Missing domain knowledge of music and listening behavior
 
 * Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
-
+9
 ----------------------------------------------------------------------------
-#### Specifications of machine used for most XGBoost NUM, H2O and LightGBM models
+Specifications of machine used for most XGBoost NUM, H2O and LightGBM models
 ----------------------------------------------------------------------------
 
 Operating System | System Model | Processor | Memory
@@ -1744,7 +1744,7 @@ Operating System | System Model | Processor | Memory
 Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz (4 CPUs), ~2.9GHz | 16 GB RAM
 
 ----------------------------------------------------------------------------
-#### Specifications of machine used for XGBoost Sparse models
+Specifications of machine used for XGBoost Sparse models
 ----------------------------------------------------------------------------
 
 * Dell PowerEdge R730 server 
