@@ -483,8 +483,13 @@ This approach was to further explore "extra info" data to check whether language
 
 ```{r}
 # Add new features: join json file with media description (categorical variables)
-extra = stream_in(file("~/60_data_other_models/extra_infos.json"))
+library(jsonlite)
+library(httr)
+library(qdap)
+library(tm)
 
+extra = stream_in(file("~/60_data_other_models/extra_infos.json"))
+extra = extra[1:100,]
 str(extra)
 
 ##################################################
@@ -518,8 +523,8 @@ extra$media_id = as.numeric(extra$media_id)
 # save(extra,file="extra_feats11.rda")
 
 #add to train_test dataset
-train_test = left_join(train_test, extra, by = "media_id")
-str(train_test)
+#train_test = left_join(train_test, extra, by = "media_id")
+#str(train_test)
 ```
 
 We checked importance of this language features through feature importance matrix in various XGBoost (label encoded), LightGBM and H2O models but their contributioin to accuracy was relatively low. The illustration of feature importance is included at the end of XGBoost NUM and LightGBM model's script. 
