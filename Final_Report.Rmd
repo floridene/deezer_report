@@ -1695,7 +1695,6 @@ In detailed, the tasks were divided as the following:
    * Pranav: Pranav applied a variety of different packages (h20, LightGBM, XGboost).
   
    * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gaps. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
-<<<<<<< HEAD
    
 #### 6 (b) Reflection
 
@@ -1733,6 +1732,10 @@ sum(is.na(user_distribution$user_id))
 
 * Insufficient computational power (gigantic sparse matrix; shared server; other groups; Prof. Löcher itself; R runs mostly on one core)
 
+* Missing domain knowledge of music and listening behavior
+
+* Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
+
 ----------------------------------------------------------------------------
 #### Specifications of machine used for most XGBoost NUM, H2O and LightGBM models
 ----------------------------------------------------------------------------
@@ -1753,9 +1756,3 @@ Windows 10 Home 64-bit | Dell Inspiron 5567 | Intel Core i7-7500U CPU @ 2.70GHz 
 * NVIDA Tesla K80 GPU with 4992 CUDA cores, 24 GB of GDDR5 memory
 
 ----------------------------------------------------------------------------
-
-* Missing domain knowledge of music and listening behavior
-
-* Problems with R Studio Web and Kick-Outs; but different accounts have the problem of different workspaces
-=======
->>>>>>> 07117c436612161dce9dc3b070f8d6a238ca1d80
