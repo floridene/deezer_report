@@ -11,7 +11,7 @@ output:
 
 ## 1. Introduction
 
-This project is based on the data science games 2017 hosted on Kaggle. It is a worldwide competition between universities. This year the data was provided by the music streaming application Deezer. They offer a recommendation feature, called “Flow”, which suggests the user songs they might like to listen to. The algorithm behind "Flow" uses collaborative filtering to provide the user with the right music at the right time. While the algorithm detects the user's current listing taste by analysing the particular streaming-session where songs are listened or skipped, the first song prediction is the most difficult one. Therefore, the goal of this challenge was to predict how likely it is that the users of the test dataset will listen to the first track of Flow. 
+This project is based on the data science games 2017 hosted on Kaggle. It is a worldwide competition between universities. This year the data was provided by the music streaming application Deezer. They offer a recommendation feature, called â€œFlowâ€, which suggests the user songs they might like to listen to. The algorithm behind "Flow" uses collaborative filtering to provide the user with the right music at the right time. While the algorithm detects the user's current listing taste by analysing the particular streaming-session where songs are listened or skipped, the first song prediction is the most difficult one. Therefore, the goal of this challenge was to predict how likely it is that the users of the test dataset will listen to the first track of Flow. 
 
 In the end of the project we achieved the place 66 out of 145 teams with 45 submissions and a score of 0.63860. This report reflects our whole project journey, including our ideas, failures and achievements. 
 
@@ -318,7 +318,7 @@ labs(subtitle="in the train set",
       caption="Source: Deezer train data")+
 theme_light()+facet_wrap(~listen_type)
 ```
-Here we can see that songs which weren´t suggested (e.g. searched for or listened to in a playlist) have an higher chance of getting listened `r mean(Deezer$is_listened[Deezer$listen_type==0])` versus songs which have been suggested by the flow `r mean(Deezer$is_listened[Deezer$listen_type==1])`.
+Here we can see that songs which werenÂ´t suggested (e.g. searched for or listened to in a playlist) have an higher chance of getting listened `r mean(Deezer$is_listened[Deezer$listen_type==0])` versus songs which have been suggested by the flow `r mean(Deezer$is_listened[Deezer$listen_type==1])`.
 
 #### 2(e) Summary of main challenges
 
@@ -601,7 +601,7 @@ formattable(head(albums[,c(2,5,6,7)],10))
 
 At this stage we decided to only grab the very first of the listed genres for each album, since it would make most sense, that the main genre is named first. We still have NULLs and NAs.
 
-Our first approach in tackling the NULLs and NAs was to get the albums corresponding artist ids. Then, with the artist information, we were able to lookup the artist´s most played genre to fill in missing data. For Example if artist 1 had 4 albums in genre "rock", one could assume that a 5th album, which genre is missing is "rock" as well.
+Our first approach in tackling the NULLs and NAs was to get the albums corresponding artist ids. Then, with the artist information, we were able to lookup the artistÂ´s most played genre to fill in missing data. For Example if artist 1 had 4 albums in genre "rock", one could assume that a 5th album, which genre is missing is "rock" as well.
 
 ```{r, message=FALSE, warning=FALSE}
 albums$artist <- all$artist_id[albums$album_id %in% all$album_id] #joining artist informations
@@ -644,7 +644,7 @@ albums2 <- bind_rows(albums2, Na.albums[!is.na(Na.albums$alb.genre2_01),-3]) #ad
 Na.albums <- Na.albums[is.na(Na.albums$alb.genre2_01),] #999 albums still without genre
 ```
 
-This implementation was a big success. We were able to make a valid guess on the genre_id by using the artist´s main genre, reducing the number of NAs and NULLs by more than 95%.
+This implementation was a big success. We were able to make a valid guess on the genre_id by using the artistÂ´s main genre, reducing the number of NAs and NULLs by more than 95%.
 
 To fill the final 999 genres, we used the bpm, which we have collected earlier to identify the genres, but as mentioned as well, we need what we know about the genre so far to fill our gaps in bpm knowledge adequately.
 
@@ -670,7 +670,7 @@ bpmclean3 <- bpmclean2[is.na(bpmclean2$track_bpm),] #where we dont have bpm data
 bpmclean3 <- merge(bpmclean3[,c(-4)],bpm.merge.genre, by="alb.genre2_01",all.x=TRUE) #join the information from the average_genre_lookup table
 ```
 
-What was quite amusing is one very resilient little fellow: In all 7.5 million songs in our data, there is only one "HörbuchaufDeutsch". Since it is the only one of his kind, and it is an album by itself, we don´t have any information, but we set the bpm to 80, which is on the lower end of the scale.
+What was quite amusing is one very resilient little fellow: In all 7.5 million songs in our data, there is only one "HÃ¶rbuchaufDeutsch". Since it is the only one of his kind, and it is an album by itself, we donÂ´t have any information, but we set the bpm to 80, which is on the lower end of the scale.
 
 ```{r}
 bpmclean3[is.na(bpmclean3$track_bpm),]
@@ -832,9 +832,9 @@ library(reshape2)
 ```
 
 Sometimes a simple idea can lead to a cascade of thoughts and breakthroughs, as happened in our case.
-The thought was a simple one: "When we look at the distribution of genres for each unique user and cluster them, don´t we actually ignore the preferences of the individual user?" What for example happens to a user, who has multiple favorite genres? Imagine a user who listens only to 5 genres in an equal distributed fashion - each of those genres have a score of 0.2 in our previous approach. Now imagine another user who listens to two genres, one 80% and one 20%. At the moment we propose, that the genres with a score of 0.2 are equally important, even though it is clearly not the case: For user 1, every genre is his favorite, while for user 2 the second genre is not his favorite.
+The thought was a simple one: "When we look at the distribution of genres for each unique user and cluster them, donÂ´t we actually ignore the preferences of the individual user?" What for example happens to a user, who has multiple favorite genres? Imagine a user who listens only to 5 genres in an equal distributed fashion - each of those genres have a score of 0.2 in our previous approach. Now imagine another user who listens to two genres, one 80% and one 20%. At the moment we propose, that the genres with a score of 0.2 are equally important, even though it is clearly not the case: For user 1, every genre is his favorite, while for user 2 the second genre is not his favorite.
 
-How to bypass this problematic? By scaling our previous results user-individual. That means, we will take an user’s favorite genre (the max() of his scores), and set it to 1 and scale all other genres accordingly. With this transformation we are able to compare different users.
+How to bypass this problematic? By scaling our previous results user-individual. That means, we will take an userâ€™s favorite genre (the max() of his scores), and set it to 1 and scale all other genres accordingly. With this transformation we are able to compare different users.
 Going back to the example from above: For user 1, each of his/her 5 genres is now a score of 1 while for user 2 only the first genre is 1 and the second is scaled respectively.
 
 ```{r}
@@ -986,7 +986,7 @@ g*l*log(c+1)
 ```
 
 We can see that the values are closer together now; still, the log is a strong enough penalty for low count cases.
-As wanted, case 1 has a lower value than before since we don´t give him that much weight through his high n.
+As wanted, case 1 has a lower value than before since we donÂ´t give him that much weight through his high n.
 
 Since we wanted more emphasis on the listening history, we thought about assigning a weight manually, something like:
 
@@ -1050,7 +1050,7 @@ formattable(behavior[1:10,1:10])
 #### 3 (g) User Behavior Index for Clustering Users
 
 Finally, we can replace the previous clustering by clustering across the users Behavior_index.
-If you havn´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
+If you havnÂ´t read 2(d), you should go back and read the explanations for our clustering approaches and codes.
 
 We want to use this journey back into our beginnings to show how different clustering methods looked like. In the end, we used the method "complete" and set the cutoff point to 35 clusters.
 
@@ -1105,7 +1105,7 @@ We were lucky and could use the data for g, l and c as additional Features.
 
 #### 3 (h) Using the Behavior Architecture to Create Further Features
 
-A day before the deadline, after the meeting with Prof. Löcher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very time consuming.
+A day before the deadline, after the meeting with Prof. LÃ¶cher and to his suggestion we used the existing behavior_index architecture to create new features, not just for genre, but also for artist and album. In this report we set the following code to eval=FALSE, because it is very time consuming.
 For Example: The lookup table for artists/user-behavior has roughly 1.3e+09 rows, the lookup for album 2.97e+09 rows.
 
 ```{r eval=FALSE}
@@ -1333,7 +1333,7 @@ Furthermore we did some additional adjustments. This was caused by merging the n
 sum(is.na(DeezerNew_test$behavior))
 ```
 
-Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters ü and ö letters had caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TürkischeVolksmusik. 
+Checking the NAs for this specific column reveals the values which could not be joined. The Spelling of the German letters Ã¼ and Ã¶ letters had caused the troubles. In the lookup table they are written like: "T<fc>rkischeVolksmusik" instead of TÃ¼rkischeVolksmusik. 
 
 ```{r}
 Deezer_fail <- DeezerNew_test %>%
@@ -1692,7 +1692,9 @@ In detailed, the tasks were divided as the following:
    
    * Max: Max focused on feature engineering and teamed up with Vera alot of the time. Since coding as a duo is, how the group found out for themself, really benefitial for qualitative working time. Max came up with the idea for the "behavior"-features and coded clustering and genre-id-cleaning. 
 
-   * Pranav: Pranav applied a variety of different packages (h20, LightGBM, XGboost).
+   * Pranav: In modeling part, Pranav focused on finding and applying most suitable modeling methods and we came up with farily latest and well known modeling algorithms such as XGBoost, LightGBM and H2O (inlcuding recent H2O automated machine learning approach). These algorithms offered very good accuracy with super fast computation specifically h2o and LighGBM. Most of these models were run on local system (laptop) in case server was occupied. He was also responsible to apply various approaches for parameters tuning for above mentioned models to reduce the test error. 
+
+In the feature engineering part, Pranav applied binning method with basic feature extraction method such as date and time features from timestamp, language detection from songs and albums and then binning them into the groups in order to further improve the accuracy of model. 
   
    * Vera: She was mainly involved in creating new features. While the most ideas came up in brainstorming meetings, this task was more about providing the additional information with cleaned and correct data. For example, one specific task was to create a new column genre, as the data analysis shown that genre information from the competition dataset was corrupt. This task was mainly solved with Max together. The data could not just be provided by querying the API, it also could be cleaned by finding new ways to fill the data gaps. Furthermore, Vera was responsible for merging all new feature tables with the provided competition dataset. She also provided some data descriptions to ensure a common understanding of the datasets.
    
@@ -1730,7 +1732,7 @@ sum(is.na(user_distribution$user_id))
 
 * Computational costs
 
-* Insufficient computational power (gigantic sparse matrix; shared server; other groups; Prof. L�cher itself; R runs mostly on one core)
+* Insufficient computational power (gigantic sparse matrix; shared server; other groups; Prof. Löcher itself; R runs mostly on one core)
 
 * Missing domain knowledge of music and listening behavior
 
