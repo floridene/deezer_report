@@ -1660,7 +1660,7 @@ As you can see our new features "profile_ID" and "Bahavior" had quite an impact.
 #### 4(c) Thoughts on the Best Model
 
 * [Leaderboard Score Analysis](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/report_slides.rmd) 
-![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/2.PNG)
+![Private LB](/home/Deezer/deezer_report/2.PNG)
 
 In terms of accuracy, the XGBoost Sparse model gave us the best accuracy on private leaderboard score however it was computationaly expensive and much time consuming considering the sparse matrix and grid search approach. Other models, such XGBoost (label encoded), LightGBM (super fast) and H2O autoML (extremely fast i.e 90 mins only) were computationally cheap and we were able to run these model locally without the server. In terms of accuracy, it was slightly lower than XGBoost Sparse model. 
 
@@ -1683,17 +1683,17 @@ SAP Predictive Analysis can be a suggestion for Managers with a low Data Science
 
 - The competition started on Friday 14 April 2017 UTC and ended on Wednesday 31 May 2017 UTC. Within this 47 days time line, we submitted total of 45 models and below is the screenshot of model accuracy over time. 
 
-![alt text](https://github.com/pranavpandya84/deezer_report/blob/master/Models/LB_Score/PublicLB.PNG)
+![Public Leaderboard](/home/Deezer/deezer_report/PublicLB.PNG)
 
 - Below is the screenshot illustrating comparison between Public & Private leaderboard score by time and our best models: 
-![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/3.PNG)
+![Overall Leaderboard](/home/Deezer/deezer_report/3.png)
 
 Below is the statistic about this competition. 
 
-![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/deezer_poster1.png)
+![Deezer Poster](/home/Deezer/deezer_report/deezer_poster1.png)
 
 - Out of 220 teams, we were ranked 66th worldwide and 3rd in Germany. 
-![alt text](https://github.com/vhwr/deezer_report/blob/master/Models/LB_Score/rank.PNG)
+![Ranking](/home/Deezer/deezer_report/rank.PNG)
 
 
 ## 6. Team Effort & Reflection
@@ -1719,7 +1719,7 @@ In detailed, the tasks were divided as the following:
 * Dig into the data
   + Further into the project we discovered that the distributions of the training dataset was biased compared to the test dataset. For instance, the "listen_type" column in the training dataset contains the values 0 and 1. However, in the test dataset only 1 occurs. Another example is the column "context_type" which features 40 different values in the training dataset. In the test dataset, only 4 values (1, 5, 20, 23) appear. Additionally, the appearance of the user_id is biased which you can see below.
   
-![alt text](https://github.com/vhwr/deezer_report/blob/master/Plots_for_Presentation/observations_distribution.png)
+![Distribution of Observations per User](/home/Max_Philipp/deezer_report/Plots_for_Presentation/observations_distribution.png)
 
 * Hyperparameter Tuning and Cross-Validation
   + When we performed HT and CV our models improved significantly. That was one of the key takeaways for us.
