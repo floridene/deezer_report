@@ -33,7 +33,12 @@ pacman::p_load(dplyr,
                httr, 
                corrplot, 
                gridExtra,
-               formattable
+               formattable,
+               qdap,
+               tm,
+               textcat,
+               rvest,
+               stringr
                )
 ```
 
@@ -481,14 +486,14 @@ If one is thinking to the parents music taste, one could claim, that elder peopl
 
 This approach was to further explore "extra info" data to check whether language detection can help identify new features or not. At first, we did text cleaning and then "textcat" package to identify unique language from song title, album title and artist's name. The next step was to include logical interaction between this variables. For example, if song language and album language is exact same them grouping them, else considering it as variation. Below is the step by step procedure followed to extract this language features. 
 
-```{r}
+```{r eval=FALSE}
 # Add new features: join json file with media description (categorical variables)
 library(jsonlite)
 library(httr)
 library(qdap)
 library(tm)
 
-extra = stream_in(file("~/60_data_other_models/extra_infos.json"))
+extra = stream_in(file("/home/Deezer/60_data_other_models/extra_infos.json"))
 extra = extra[1:100,]
 str(extra)
 
@@ -1384,6 +1389,11 @@ In the end both files are combined. This was needed for hot endcoding and creati
 ```
 
 
+```{r}
+rm(list=ls())
+gc()
+```
+
 ## 4. Modeling
 
 Data scientists spend most of their time on cleaning, labeling and organizing data ([link](https://visit.crowdflower.com/rs/416-ZBE-142/images/CrowdFlower_DataScienceReport.pdf?mkt_tok=eyJpIjoiTTJFek1UaGxNekl5TmpJeCIsInQiOiJPMXpWVnREbHJGR1RHN1BUVk9Zdm5xTEEyNXRpdDRONmZ4XC9oaFwvZGpFNnB0Z0hIWERGS1NqN0huRjB5QUE1UUJVbVZxNFhaeVBSUXJzMTNYdmRJRFhDMU94N). Fortunately, this task has been done. With a solid base of available data, the time has come to build and train our models.
@@ -1416,7 +1426,7 @@ In this very first model we didn't include all the features we developed over th
 
 ```{r}
 ## 0. Load the data.
-load("~/30_Wrangled_Data/Archiv/Deezer_new.rda")
+load("/home/Deezer/30_Wrangled_Data/Archiv/Deezer_new.rda")
 
 ## 1. Wrap full_dataset with data.table because its performance for large datasets is best in class.
 df <- data.table(DeezerNew_all, keep.rownames = F)
@@ -1452,7 +1462,7 @@ bst <- xgboost(data = sparse_train,           # Data source to train the model.
 XGpred <- predict(bst, sparse_test)
 
 ## 5. Create a submission file.
-submission <- read.csv("~/10_Basic_Dataset/sample_submission_kaggle.csv")
+submission <- read.csv("/home/Deezer/10_Basic_Dataset/sample_submission_kaggle.csv")
 submission$is_listened <- XGpred
 write.csv(submission, "OHE_xgb300_May17_wo_profileID.csv", row.names = FALSE)
 ```
@@ -1471,7 +1481,7 @@ We start with HT and CV.
 
 ```{r}
 ## 1. Load only the train data.
-load("~/30_Wrangled_Data/Deezer_traintest_0525.rda")
+load("/home/Deezer/30_Wrangled_Data/Deezer_traintest_0525.rda")
 summary(DeezerNew_train_0525) # Check for any NAs because XGboost can also not deal with those.
 
 ## 2. We wanted to use the full dataset to get the most out of the available information. We first needed to delete the "sample_id" column because they are empty.
@@ -1555,9 +1565,9 @@ It is time for the final model building part. We have to apply our best settings
 
 ```{r}
 ## 0. Just to make sure we have the correct source data, we load it once again. These are the train, test and combined datasets.
-load("~/30_Wrangled_Data/Deezer_train_0525.rda")
-load("~/30_Wrangled_Data/Deezer_test_0525.rda")
-load("~/30_Wrangled_Data/Deezer_traintest_0525.rda")
+load("/home/Deezer/30_Wrangled_Data/Deezer_train_0525.rda")
+load("/home/Deezer/30_Wrangled_Data/Deezer_test_0525.rda")
+load("/home/Deezer/30_Wrangled_Data/Deezer_traintest_0525.rda")
 
 ## 1. In each dataset we delete the "sample_id".
 DeezerNew_traintest_0525 <- subset(DeezerNew_traintest_0525, select = -sample_id)
@@ -1611,14 +1621,14 @@ XGB_300_fulldataset_0526 <- xgboost(params = param,
 XGB_300_fulldataset_0526_Pred <- predict(XGB_300_fulldataset_0526, sparse_test)
 
 ## Create submission file
-submission <- read.csv("~/10_Basic_Dataset/sample_submission_kaggle.csv")
+submission <- read.csv("/home/Deezer/10_Basic_Dataset/sample_submission_kaggle.csv")
 submission$is_listened <- XGB_300_fulldataset_0526_Pred
 write.csv(submission,"XGB_300_fulldataset_0526_Pred",row.names = FALSE)
 ```
 
 Let's have a look at the most important features. Note, XGboost allows you to save trained models. We saved a model that has the same input as above but was only trained for 100 rounds. Difference between the 300 and 100 round model should be relatively small. For convenience reasons we are going to load the 100 round model and plot the feature importance on it.
 
-```{r}
+```{r eval=FALSE}
 bst <- xgb.load("XGB_100_fulldataset_0527.model")
 prediction <- predict(bst, sparse_test)
 
